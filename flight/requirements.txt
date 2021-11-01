@@ -1,0 +1,5 @@
+aiogrpc==1.8
+grpcio==1.41.1
+mavsdk==0.21.0
+protobuf==3.19.1
+six==1.16.0

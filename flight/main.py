@@ -1,0 +1,2 @@
+import mavsdk
+print(mavsdk)
