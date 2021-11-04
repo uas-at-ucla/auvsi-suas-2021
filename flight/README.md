@@ -16,6 +16,13 @@ To run without a GUI,
 make px4_sitl gazebo HEADLESS=1
 ```
 
+Alternatively, you can use the `launch_sim.sh` script.
+```
+export PX4_PATH=<Path to your px4 installation>
+export HEADLESS=<1 or 0> (optional) 
+./launch_sim.sh
+```
+
 ## Virtual Environment
 
 We use a virtual environment to keep track of the different libraries we use.
