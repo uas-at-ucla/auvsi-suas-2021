@@ -1,8 +1,13 @@
+"""
+Module for telemetry update coroutines.
+"""
 from mavsdk import System
-from mavsdk.telemetry_pb2 import Position
 
 
 class TelemetryData:
+    """
+    Stores telemetry data.
+    """
     latitude = None
     longitude = None
     absolute_altitude = None
@@ -10,9 +15,11 @@ class TelemetryData:
 
 
 async def position(drone: System, telemetry_data: TelemetryData):
-    async for position in drone.telemetry.position():
-        telemetry_data.latitude = position.latitude_deg
-        telemetry_data.longitude = position.longitude_deg
-        telemetry_data.absolute_altitude = position.absolute_altitude_m
-        telemetry_data.relative_altitude = position.relative_altitude_m
-
+    """
+    Coroutine to constantly update telemetry_data with latest position data
+    """
+    async for pos in drone.telemetry.position():
+        telemetry_data.latitude = pos.latitude_deg
+        telemetry_data.longitude = pos.longitude_deg
+        telemetry_data.absolute_altitude = pos.absolute_altitude_m
+        telemetry_data.relative_altitude = pos.relative_altitude_m
