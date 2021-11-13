@@ -2,7 +2,7 @@ import asyncio
 from movement import *
 
 from mavsdk import System
-from telemetry import TelemetryData, position, landed
+from telemetry import TelemetryData
 from utils import compare_altitude, compare_position
 
 HOME_LAT = 38.144478
@@ -20,23 +20,24 @@ async def main():
             print("Drone Connected Successfully!")
             break
 
-    telemetry_data = TelemetryData()
-    asyncio.create_task(position(drone, telemetry_data))
-    asyncio.create_task(landed(drone, telemetry_data))
+    t_data = TelemetryData()
+    asyncio.create_task(t_data.position(drone))
+    asyncio.create_task(t_data.landed(drone))
 
-    await asyncio.sleep(1)
+    while not t_data.is_landed:
+        await asyncio.sleep(1)
 
-    await takeoff(drone, telemetry_data)
+    await takeoff(drone, t_data)
     await goto_location(
         drone,
-        telemetry_data,
+        t_data,
         38.144500,
         -76.42942,
-        telemetry_data.absolute_altitude,
+        t_data.absolute_altitude,
         0)
 
-    await return_to_home(drone, telemetry_data)
-    await land(drone, telemetry_data)
+    await return_to_home(drone, t_data)
+    await land(drone, t_data)
 
     await asyncio.sleep(1)
 
