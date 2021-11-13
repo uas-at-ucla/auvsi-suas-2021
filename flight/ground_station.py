@@ -22,7 +22,7 @@ async def heartbeat(data: TelemetryData, mission_data):
     2. Get mission
     """
     while True:
-        # result = requests.POST(serve, body=data.to_json())
+        # result = requests.POST(server, body=data.to_json())
         # if result.status == 200:
         #   heartbeat_established = true
         #   last_heartbeat = datetime.now()
