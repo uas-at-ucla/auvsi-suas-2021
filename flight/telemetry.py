@@ -23,8 +23,13 @@ class TelemetryData:
     right = None
     down = None
     battery = None
+    
+    def msToK(double num):
+        return num*1.944;
 
-
+    def mToFt(double num):
+        return num*3.281;
+    
     async def position(self, drone: System):
         """
         Continue to constantly update telemetry_data with latest position data
@@ -33,8 +38,10 @@ class TelemetryData:
             self.latitude = pos.latitude_deg
             self.longitude = pos.longitude_deg
             self.absolute_altitude = pos.absolute_altitude_m
-            self.relative_altitude = pos.relative_altitude_m  
-
+            self.relative_altitude = pos.relative_altitude_m 
+            
+            self.absolute_altitude = mToFt(self.absolute_altitude);
+            self.relative_altitude = mToFt(self.relative_altitude);
 
     async def body(self, drone: System):
         async for turn in drone.telemetry.AngularVelocityBody():
@@ -56,12 +63,14 @@ class TelemetryData:
     async def ground_velocity(self, drone: System):
         async for g_velocity in drone.telemetry.velocity_ned():
             self.g_velocity= g_velocity
+            
+            self.g_velocity=msToK(self.g_velocity);
 
 
     async def angular_velocity(self, drone: System):
         async for a_velocity in drone.telemetry.attitude_angular_velocity_body():
             self.a_velocity= a_velocity
-
+            
 
     async def acceleration(self, drone: System):
         async for acc in drone.telemetry.AccelerationFrd():
