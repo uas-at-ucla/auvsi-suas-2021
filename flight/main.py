@@ -3,11 +3,6 @@ from movement import *
 
 from mavsdk import System
 from telemetry import TelemetryData
-from utils import compare_altitude, compare_position
-
-HOME_LAT = 38.144478
-HOME_LON = -76.42942
-UPDATE_TIME = 1
 
 
 async def main():

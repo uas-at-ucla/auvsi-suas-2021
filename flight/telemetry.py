@@ -4,6 +4,14 @@ Module for telemetry update coroutines.
 from mavsdk import System
 
 
+def mps_to_kn(num):
+    return num * 1.944
+
+
+def m_to_ft(num):
+    return num * 3.281
+
+
 class TelemetryData:
     """
     Stores telemetry data.
@@ -23,13 +31,8 @@ class TelemetryData:
     right = None
     down = None
     battery = None
-    
-    def msToK(double num):
-        return num*1.944;
 
-    def mToFt(double num):
-        return num*3.281;
-    
+
     async def position(self, drone: System):
         """
         Continue to constantly update telemetry_data with latest position data
@@ -38,16 +41,17 @@ class TelemetryData:
             self.latitude = pos.latitude_deg
             self.longitude = pos.longitude_deg
             self.absolute_altitude = pos.absolute_altitude_m
-            self.relative_altitude = pos.relative_altitude_m 
-            
-            self.absolute_altitude = mToFt(self.absolute_altitude);
-            self.relative_altitude = mToFt(self.relative_altitude);
+            self.relative_altitude = pos.relative_altitude_m
+
+            self.absolute_altitude = m_to_ft(self.absolute_altitude)
+            self.relative_altitude = m_to_ft(self.relative_altitude)
+
 
     async def body(self, drone: System):
         async for turn in drone.telemetry.AngularVelocityBody():
-            self.roll=turn.roll_rad_s
-            self.pitch=turn.pitch_rad_s
-            self.yaw=turn.yaw_rad_s
+            self.roll = turn.roll_rad_s
+            self.pitch = turn.pitch_rad_s
+            self.yaw = turn.yaw_rad_s
 
 
     async def landed(self, drone: System):
@@ -62,28 +66,26 @@ class TelemetryData:
 
     async def ground_velocity(self, drone: System):
         async for g_velocity in drone.telemetry.velocity_ned():
-            self.g_velocity= g_velocity
-            
-            self.g_velocity=msToK(self.g_velocity);
+            self.g_velocity = mps_to_kn(g_velocity)
 
 
     async def angular_velocity(self, drone: System):
         async for a_velocity in drone.telemetry.attitude_angular_velocity_body():
-            self.a_velocity= a_velocity
-            
+            self.a_velocity = a_velocity
+
 
     async def acceleration(self, drone: System):
         async for acc in drone.telemetry.AccelerationFrd():
-            self.forward=acc.forward_m_s2
-            self.right=acc.right_m_s2
-            self.down=acc.down_m_s2
+            self.forward = acc.forward_m_s2
+            self.right = acc.right_m_s2
+            self.down = acc.down_m_s2
 
 
     async def battery_status(self, drone: System):
         async for battery in drone.telemetry.battery():
-            self.battery=battery
+            self.battery = battery
 
-    
+
 #telemetry data needed
 '''
 gps coordinates  - check
@@ -96,5 +98,3 @@ flight status
     ground       - check
     air          - check
 '''
-
-

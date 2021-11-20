@@ -1,6 +1,11 @@
 from mavsdk import System
-from telemetry import TelemetryData, position, landed
+from telemetry import TelemetryData
 from utils import compare_altitude, compare_position
+import asyncio
+
+UPDATE_TIME = 1
+HOME_LAT = 38.144478
+HOME_LON = -76.42942
 
 async def takeoff(
     drone: System,
@@ -14,7 +19,7 @@ async def takeoff(
 
     alt = telemetry_data.relative_altitude
     # Continue until takeoff altitude reached
-    while not compare_altitude(alt, takeoff_alt):
+    while alt is None or not compare_altitude(alt, takeoff_alt):
         await asyncio.sleep(UPDATE_TIME)
         alt = telemetry_data.relative_altitude
         print(f"ALTITUDE: {alt}")
