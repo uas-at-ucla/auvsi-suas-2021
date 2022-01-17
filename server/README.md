@@ -10,6 +10,14 @@ ground <-->  server <--> interops
 The server uses Express on NodeJs
 
 ## Install and Config
+To install nodejs and npm run
+```
+curl -sL https://deb.nodesource.com/setup_16.x -o ~/nodesource_setup.sh
+sudo bash ~/nodesource_setup.sh
+sudo apt-get install nodejs
+node -v
+```
+
 To install necessary packages, run
 ```
 npm install
@@ -18,8 +26,8 @@ npm install
 Create a file `.env` to store environment variables needed for configuration
 ```
 INTEROPS_HOST=<interops host address:port>
-USERNAME=<interops team username>
-PASSWORD=<interops team password>
+INTEROPS_USERNAME=<interops team username>
+INTEROPS_PASSWORD=<interops team password>
 ```
 Replace strings marked with \<description\> with config values
 
