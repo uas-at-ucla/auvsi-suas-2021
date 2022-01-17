@@ -19,6 +19,16 @@ app.get('/ping', (req, res) => {
     res.status(200).send("Pong!");
 });
 
+// Communication with the drone
+import Drone from './routes/drone.js';
+const drone = new Drone(interops_server);
+app.use('/drone', drone.router);
+
+// Communication with the ground station
+import GroundStation from './routes/ground.js';
+const ground = new GroundStation(interops_server);
+app.use('/ground', ground.router);
+
 app.listen(port, () => {
     // Login into Interops
     interops_server.login(username, password).then(async (success) => {
