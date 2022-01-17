@@ -4,6 +4,7 @@ import { json } from 'express';
 import InteropServer from './interops.js';
 import 'dotenv/config'
 
+// Load in environment variables
 const port = process.env.PORT || 3000
 const interops_host = process.env.INTEROPS_HOST || "localhost:8000"
 const username = process.env.INTEROPS_USERNAME || "testuser"

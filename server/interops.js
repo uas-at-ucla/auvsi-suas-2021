@@ -1,3 +1,7 @@
+/*
+* This class encapsulates interaction with the interop server
+*/
+
 import fetch from "node-fetch"
 
 export default class InteropServer {
@@ -46,6 +50,22 @@ export default class InteropServer {
                 return undefined;
             else
                 return await response.json();
+        }).catch(error => console.error('Error on Interops Login:', error));
+    }
+
+    async post_telemetry(telemetry_data) {
+        if (!this.connected) return false;
+
+        return await fetch(`${this.host}/api/telemtry`, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': this.cookie
+            },
+            body: JSON.stringify(telemetry_data)
+        }).then(response => {
+            return response.ok;
         }).catch(error => console.error('Error on Interops Login:', error));
     }
 }
