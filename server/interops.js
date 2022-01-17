@@ -56,7 +56,7 @@ export default class InteropServer {
     async post_telemetry(telemetry_data) {
         if (!this.connected) return false;
 
-        return await fetch(`${this.host}/api/telemtry`, {
+        return await fetch(`${this.host}/api/telemetry`, {
             method: 'POST',
             mode: 'cors',
             headers: {
