@@ -5,8 +5,23 @@ Helper function module
 from typing import Tuple, Union
 
 
-COORD_EPSILON = 0.000001
-ALTITUDE_EPSILON = 0.1
+COORD_EPSILON = 0.000005
+ALTITUDE_EPSILON = 1
+
+def mps_to_kn(num):
+    return num * 1.944
+
+
+def m_to_ft(num):
+    return num * 3.281
+
+
+def kn_to_mps(num):
+    return num / 1.944
+
+
+def ft_to_m(num):
+    return num / 3.281
 
 
 def compare_coords(

@@ -3,7 +3,7 @@ from movement import *
 
 from mavsdk import System
 from telemetry import TelemetryData
-
+from ground_station import telemetry_heartbeat
 
 async def main():
     drone = System()
@@ -18,9 +18,12 @@ async def main():
     t_data = TelemetryData()
     asyncio.create_task(t_data.position(drone))
     asyncio.create_task(t_data.landed(drone))
+    
 
     while not t_data.is_landed:
         await asyncio.sleep(1)
+
+    asyncio.create_task(telemetry_heartbeat(t_data))
 
     await takeoff(drone, t_data)
     await goto_location(

@@ -2,14 +2,7 @@
 Module for telemetry update coroutines.
 """
 from mavsdk import System
-
-
-def mps_to_kn(num):
-    return num * 1.944
-
-
-def m_to_ft(num):
-    return num * 3.281
+from utils import mps_to_kn, m_to_ft
 
 
 class TelemetryData:

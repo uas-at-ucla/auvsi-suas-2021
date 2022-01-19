@@ -1,6 +1,6 @@
 from mavsdk import System
 from telemetry import TelemetryData
-from utils import compare_altitude, compare_position
+from utils import compare_altitude, compare_position, mps_to_kn, m_to_ft, ft_to_m, kn_to_mps
 import asyncio
 
 UPDATE_TIME = 1
@@ -10,9 +10,9 @@ HOME_LON = -76.42942
 async def takeoff(
     drone: System,
     telemetry_data: TelemetryData,
-    takeoff_alt: float = 30):
+    takeoff_alt: float = 100):
 
-    await drone.action.set_takeoff_altitude(takeoff_alt)
+    await drone.action.set_takeoff_altitude(ft_to_m(takeoff_alt))
     await drone.action.arm()
     await drone.action.takeoff()
     print("Taking Off")
@@ -22,7 +22,7 @@ async def takeoff(
     while alt is None or not compare_altitude(alt, takeoff_alt):
         await asyncio.sleep(UPDATE_TIME)
         alt = telemetry_data.relative_altitude
-        print(f"ALTITUDE: {alt}")
+        print(f"ALTITUDE: {alt} ft")
 
     print("Takeoff Finished")
 
@@ -37,7 +37,7 @@ async def land(
 
     alt = telemetry_data.relative_altitude
     while not compare_altitude(alt, 0, 1):
-        print(f"ALTITUDE: {alt}")
+        print(f"ALTITUDE: {alt} ft")
         await asyncio.sleep(UPDATE_TIME)
         alt = telemetry_data.relative_altitude
 
@@ -50,7 +50,7 @@ async def goto_location(
     alt: float,
     yaw: float):
 
-    await drone.action.goto_location(lat, lon, alt, yaw)
+    await drone.action.goto_location(lat, lon, ft_to_m(alt), yaw)
     print(f"Going to location ({lat}, {lon}, {alt})")
 
     # Wait until location reached

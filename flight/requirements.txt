@@ -1,6 +1,9 @@
 aiogrpc==1.8
 astroid==2.8.4
+certifi==2021.10.8
+charset-normalizer==2.0.10
 grpcio==1.41.1
+idna==3.3
 isort==5.10.0
 lazy-object-proxy==1.6.0
 mavsdk==0.21.0
@@ -8,7 +11,9 @@ mccabe==0.6.1
 platformdirs==2.4.0
 protobuf==3.19.1
 pylint==2.11.1
+requests==2.27.1
 six==1.16.0
 toml==0.10.2
 typing-extensions==3.10.0.2
+urllib3==1.26.8
 wrapt==1.13.3

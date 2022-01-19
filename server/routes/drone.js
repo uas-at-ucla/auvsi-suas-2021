@@ -28,7 +28,7 @@ export default class Drone {
                 else 
                     console.log("DEBUG: Failed to post telemtry data to Interops Server");
             }
-
+            console.log(`DEBUG: telemetry data ${this.get_telemetry()}`);
             res.status(200).send("Telemetry data saved");
         });
     }
