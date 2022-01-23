@@ -17,6 +17,12 @@ HOST = "http://localhost:3000"
 heartbeat_established = False
 last_heartbeat = datetime.now()
 
+def test_connection():
+    try:
+        result = requests.get(f"{HOST}/ping")
+        return result.ok
+    except:
+        return False
 
 async def telemetry_heartbeat(data: TelemetryData):
     while True:
@@ -28,22 +34,3 @@ async def telemetry_heartbeat(data: TelemetryData):
         })
         print(result.status_code, result.text)
         await asyncio.sleep(1)
-
-async def heartbeat(data: TelemetryData, mission_data):
-    """
-    Establishes heartbeat with the ground station server
-    1. Upload Telemetry data
-    2. Get mission
-    """
-    while True:
-        # result = requests.POST(server, body=data.to_json())
-        # if result.status == 200:
-        #   heartbeat_established = true
-        #   last_heartbeat = datetime.now()
-        #   mission_data.update(result.json())
-        # else:
-        #   heartbeat_established = false
-        #   timeout = datetime.now() - last_heartbeat
-        #   if timeout >= RTH_TIMEOUT: return_to_home()
-        #   else if timeout >= LAND_TIMEOUT: land()
-        await asyncio.sleep(HEARTBEAT_RATE)
