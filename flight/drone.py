@@ -3,11 +3,79 @@ from telemetry import TelemetryData
 from communication import *
 import asyncio
 from movement import *
+import requests
+
+HOST = "http://localhost:3000"
+
+def get_data(data, key, default=None):
+    if key in data:
+        return data[key]
+    return default
+
+
+def get_list_of_points(data, key):
+    points = get_data(data, key, [])
+    for i in range(len(points)):
+        points[i] = MissionPoint(points[i])
+    return points
+
+
+class MissionPoint:
+    def __init__(self, data):
+        self.latitude = get_data(data, 'latitude')
+        self.longitude = get_data(data, 'longitude')
+        self.altitude = get_data(data, 'altitude')
+
+
+class Obstacle(MissionPoint):
+    def __init__(self, data):
+        super().__init__(data)
+        self.radius = get_data(data, 'radius')
+        self.height = get_data(data, 'height')
+
+
+class FlyZone:
+    def __init__(self, data):
+        self.altitudeMin = get_data(data, 'altitudeMin')
+        self.altitudeMax = get_data(data, 'altitudeMax')
+        self.boundaryPoints = get_list_of_points(data, 'boundaryPoints')
+
+
+class Mission:
+    def __init__(self, data):
+        self.id = data['id']
+        
+        self.lostCommsPos = MissionPoint(get_data(data, 'lostCommsPos', {}))
+        
+        self.flyZones = []
+        if ('flyZones' in data):
+            for zone in data['flyZones']:
+                self.flyZones.append(FlyZone(zone))
+        
+        self.waypoints = get_list_of_points(data, 'waypoints')
+        self.searchGridPoints = get_list_of_points(data, 'searchGridPoints')
+        
+        self.offAxisOdlcPos = MissionPoint(get_data(data, 'offAxisOdlcPos', {}))
+        self.emergentLastKnowPos = MissionPoint(get_data(data, 'emergentLastKnowPos', {}))
+        
+        self.airDropBoundaryPoints = get_list_of_points(data, 'airDropBoundaryPoints')
+        self.airDropsPos = MissionPoint(get_data(data, 'airDropPos', {}))
+        self.ugvDrivePos = MissionPoint(get_data(data, 'ugvDrivePos', {}))
+
+        self.stationaryObstacles = []
+        if ('stationaryObstacles' in data):
+            for obstacle in data['stationaryObstacles']:
+                self.stationaryObstacles.append(Obstacle(obstacle))
+
+        self.mapCenterpos = MissionPoint(get_data(data, 'mapCenterPos', {}))
+        self.mapHeight = get_data(data, 'mapHeight')
+
 
 class Drone:
     def __init__(self):
         self.system = System()
         self.telemetry = TelemetryData()
+        self.mission = None
 
 
     async def connect(self):
@@ -27,6 +95,21 @@ class Drone:
     def start_heartbeat(self):
         if (test_connection()):
             asyncio.create_task(telemetry_heartbeat(self.telemetry))
+            asyncio.create_task(self._mission_heartbeat())
+
+    
+    async def _mission_heartbeat(self):
+        while True:
+            result = requests.get(f"{HOST}/drone/mission")
+            if (result.ok):
+                mission_data = result.json()
+                self.mission = Mission(mission_data)
+                print(self.mission.__dict__)
+            await asyncio.sleep(10)
+
+
+    async def _finish_mission(self):
+        pass
 
     
     async def takeoff(self):

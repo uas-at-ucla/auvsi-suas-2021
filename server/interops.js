@@ -33,10 +33,10 @@ export default class InteropServer {
                 this.connected = true;
             }
             return this.connected;
-        }).catch(error => console.error('Error on Interops Login:', error));
+        }).catch(error => console.error('Error on Interops login:', error));
     }
 
-    async get_missions(index=1) {
+    async get_mission(index=1) {
         if (!this.connected) return undefined;
 
         return await fetch(`${this.host}/api/missions/${index}`, {
@@ -50,7 +50,7 @@ export default class InteropServer {
                 return undefined;
             else
                 return await response.json();
-        }).catch(error => console.error('Error on Interops Login:', error));
+        }).catch(error => console.error('Error on Interops get_mission:', error));
     }
 
     async post_telemetry(telemetry_data) {
@@ -66,6 +66,6 @@ export default class InteropServer {
             body: JSON.stringify(telemetry_data)
         }).then(response => {
             return response.ok;
-        }).catch(error => console.error('Error on Interops Login:', error));
+        }).catch(error => console.error('Error on Interops post_telemetry:', error));
     }
 }
