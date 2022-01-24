@@ -70,5 +70,11 @@ Content-Type: application/json
 }
 ```
 
+### GET /drone/mission
+Gets the current mission (see interops server for mission data structure)
+
+### GET /drone/mission/:id
+Get the mission with specified id (see interops server for mission data structure)
+
 ## /ground
 routes which the ground station should use.
