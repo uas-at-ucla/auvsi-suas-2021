@@ -1,3 +1,5 @@
+import datetime
+from datetime import timezone
 from mavsdk import System
 from telemetry import TelemetryData
 from communication import *
@@ -76,6 +78,9 @@ class Drone:
         self.system = System()
         self.telemetry = TelemetryData()
         self.mission = None
+        self.ground_altitude = 0
+        self.last_contact = datetime.datetime.now(timezone.utc).timestamp()
+        self.last_ground_contact = datetime.datetime.now(timezone.utc).timestamp()
 
 
     async def connect(self):
@@ -94,18 +99,40 @@ class Drone:
 
     def start_heartbeat(self):
         if (test_connection()):
-            asyncio.create_task(telemetry_heartbeat(self.telemetry))
-            asyncio.create_task(self._mission_heartbeat())
+            # asyncio.create_task(telemetry_heartbeat(self.telemetry))
+            # asyncio.create_task(self._get_mission())
+            asyncio.create_task(self._heartbeat())
 
-    
-    async def _mission_heartbeat(self):
+    async def _heartbeat(self):
         while True:
-            result = requests.get(f"{HOST}/drone/mission")
+            result = requests.post(f"{HOST}/drone/heartbeat", json={
+                "telemetryData": {
+                    "latitude": self.telemetry.latitude,
+                    "longitude": self.telemetry.longitude,
+                    "altitude": self.telemetry.relative_altitude,
+                    "heading": self.telemetry.yaw
+                }
+            })
+            
             if (result.ok):
-                mission_data = result.json()
-                self.mission = Mission(mission_data)
-                print(self.mission.__dict__)
-            await asyncio.sleep(10)
+                data = result.json()
+                self.last_contact = datetime.datetime.now(timezone.utc).timestamp()
+                
+                self.last_ground_contact = get_data(data, "lastGroundContact")
+                # TODO: check if last_ground_contact is acceptable, otherwise return home 
+                
+                mission_id = get_data(data, "currentMissionId")
+                if (mission_id is not None and (self.mission is None or self.mission.id != mission_id)):
+                    await self._get_mission()
+            
+            await asyncio.sleep(1)
+
+
+    async def _get_mission(self):
+        result = requests.get(f"{HOST}/drone/mission")
+        if (result.ok):
+            mission_data = result.json()
+            self.mission = Mission(mission_data)
 
 
     async def _finish_mission(self):
@@ -113,6 +140,7 @@ class Drone:
 
     
     async def takeoff(self):
+        self.ground_altitude = self.telemetry.absolute_altitude
         await takeoff(self.system, self.telemetry)
 
     

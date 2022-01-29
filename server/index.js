@@ -30,6 +30,9 @@ import GroundStation from './routes/ground.js';
 const ground = new GroundStation(interops_server);
 app.use('/ground', ground.router);
 
+drone.set_ground_station(ground);
+ground.set_drone(drone);
+
 app.listen(port, () => {
     // Login into Interops
     interops_server.login(username, password).then(async (success) => {
