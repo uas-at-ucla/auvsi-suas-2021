@@ -1,5 +1,4 @@
-import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 from mavsdk import System
 from telemetry import TelemetryData
 from communication import *
@@ -79,8 +78,8 @@ class Drone:
         self.telemetry = TelemetryData()
         self.mission = None
         self.ground_altitude = 0
-        self.last_contact = datetime.datetime.now(timezone.utc).timestamp()
-        self.last_ground_contact = datetime.datetime.now(timezone.utc).timestamp()
+        self.last_contact = datetime.now(timezone.utc).timestamp()
+        self.last_ground_contact = datetime.now(timezone.utc).timestamp()
 
 
     async def connect(self):
@@ -116,7 +115,7 @@ class Drone:
             
             if (result.ok):
                 data = result.json()
-                self.last_contact = datetime.datetime.now(timezone.utc).timestamp()
+                self.last_contact = datetime.now(timezone.utc).timestamp()
                 
                 self.last_ground_contact = get_data(data, "lastGroundContact")
                 # TODO: check if last_ground_contact is acceptable, otherwise return home 
