@@ -60,13 +60,34 @@ routes which the drone should use.
 saves the posted drone telemtry data.
 
 ```
-Content-Type: application/json
-
 {
-    latitude: <drone latitude>
-    longitude: <drone longitude>
-    altitude: <drone altitude>
-    heading: <drone heading>
+  "latitude": <drone latitude>
+  "longitude": <drone longitude>
+  "altitude": <drone altitude>
+  "heading": <drone heading>
+}
+```
+
+### POST /drone/heartbeat
+Used for more advanced heartbeat with the server
+
+Send
+```
+{
+  "telemetryData": {
+    "latitude": <drone latitude>
+    "longitude": <drone longitude>
+    "altitude": <drone altitude>
+    "heading": <drone heading>
+  }
+}
+```
+Receive
+```
+{
+  "lastGroundContact": <UTC timestamp when ground station last contacted server>
+  "interopsConnected": <whether server is still connected to interops>
+  "currentMissionId": <mission id currently stored in server>
 }
 ```
 
@@ -78,3 +99,19 @@ Get the mission with specified id (see interops server for mission data structur
 
 ## /ground
 routes which the ground station should use.
+
+### GET /ground/heartbeat
+Simple heartbeat to server from ground station
+
+Returns 
+```
+{
+  "latitude": <last know drone latitude>
+  "longitude": <last know drone longitude>
+  "altitude": <last know drone altitude>
+  "heading": <last know drone heading>
+}
+```
+
+### GET /ground/mission
+Gets the current mission (see interops server for mission data structure)
