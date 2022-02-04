@@ -20,29 +20,16 @@ export default class Drone {
         });
 
         // Check heartbeat
-        this.router.get('/heartbeat', this.get_heartbeat_route);
+        this.router.get('/heartbeat', (res, req) => this.get_heartbeat_route(res, req));
 
         // Drone sends any drone updates, and server responds with any server updates
-        this.router.post('/heartbeat', this.post_heartbeat_route);
+        this.router.post('/heartbeat', (res, req) => this.post_heartbeat_route(res, req));
 
         // Post telemetry data
-        this.router.post('/telemetry', this.post_telemetry_route);
+        this.router.post('/telemetry', (res, req) => this.post_telemetry_route(res, req));
 
         // Get mission
-        this.router.get('/mission', async (req, res) => {
-            if (this.interops_server.connected) {
-                let mission = await this.interops_server.get_mission(this.mission_index);
-                //console.log(mission);
-                if (mission) {
-                    this.current_mission = mission;
-                    console.log("DEBUG: Got current mission data from Interops Server");
-                }
-                else if (mission === undefined) {
-                    console.log("DEBUG: Failed to get telemtry from Interops Server");
-                }
-            }
-            res.status(200).json(this.current_mission);
-        });
+        this.router.get('/mission', async (res, req) => await this.get_mission_route(res, req));
 
         this.router.get('/mission/:id', async (req, res) => {
             let index = parseInt(req.params.index, 10);
@@ -60,18 +47,13 @@ export default class Drone {
             }
             res.status(404).send("Could not get mission data from Interops Server");
         });
-
-        // Finish mission
-        this.router.post('/mission', (req, res) => {
-            let confirmation = req.body;
-        });
     }
 
     // Router functions
 
     get_heartbeat_route(req, res) {
         res.json({
-            ground: new Date.now(),
+            ground: Date.now(),
             interops: this.interops_server.connected
         });
     }
@@ -82,12 +64,14 @@ export default class Drone {
 
         // parse telemetry data
         let telemetry = drone_data.telemetryData;
-        this.set_telemetry(telemetry);
+        if (telemetry !== undefined)
+            this.set_telemetry(telemetry);
         
         // Prepare server data to send to drone
         let ground_station_contact = undefined;
+        
         if (this.ground_station !== undefined)
-            ground_station_contact == this.ground_station.last_contact
+            ground_station_contact = this.ground_station.last_contact
 
         let server_data = {
             lastGroundContact: ground_station_contact,
@@ -110,12 +94,19 @@ export default class Drone {
         res.status(200).send("Telemetry data saved");
     }
 
-    get_mission_route(req, res, id=-1) {
-
-    }
-
-    post_mission_route(req, res) {
-
+    async get_mission_route(req, res, id=-1) {
+        if (this.interops_server.connected) {
+            let mission = await this.interops_server.get_mission(this.mission_index);
+            //console.log(mission);
+            if (mission) {
+                this.current_mission = mission;
+                console.log("DEBUG: Got current mission data from Interops Server");
+            }
+            else if (mission === undefined) {
+                console.log("DEBUG: Failed to get telemtry from Interops Server");
+            }
+        }
+        res.status(200).json(this.current_mission);
     }
 
     // Helper functions

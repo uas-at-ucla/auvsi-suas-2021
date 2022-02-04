@@ -11,45 +11,26 @@ export default class GroundStation {
         this.drone = undefined;
 
         this.router.use((req, res, next) => {
-            this.last_contact = Data.now();
+            this.last_contact = Date.now();
             next();
         });
 
-        this.router.get('/heartbeat', this.get_heartbeat);
+        this.router.get('/heartbeat', (req, res) => this.get_heartbeat(req, res));
 
-        this.router.get('/mission', (req, res) => {
-            if (this.interops_server.connected)
-                res.json(this.interops_server.get_mission)
-            else {
-                res.json({
-                    id: 1,
-                    waypoints: [
-                        {
-                            latitude: 100,
-                            longitude: 100,
-                        },
-                        {
-                            latitude: 200,
-                            longitude: 200,
-                        },
-                    ]
-                });
-            }
-            res.status(200).end();
-        });
-
-        this.router.post('/test', (req, res) => {
-            console.log(req.body);
-            res.send(req.body);
+        this.router.get('/mission', async (req, res) => {
+            if (this.drone !== undefined && this.drone.current_mission !== undefined)
+                res.json(this.drone.current_mission)
+            else if (this.interops_server.connected)
+                res.json(await this.interops_server.get_mission())
+            else
+                res.status(200).end()
         });
     }
 
     // Router methods
 
     get_heartbeat(req, res) {
-        if (this.drone !== undefined)
-            res.json(drone.get_telemetry());
-
+        res.json(this.drone.get_telemetry());
         res.status(200).end();
     }
 
