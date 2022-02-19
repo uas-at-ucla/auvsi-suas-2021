@@ -117,7 +117,7 @@ class Drone:
                 data = result.json()
                 self.last_contact = datetime.now(timezone.utc).timestamp()
                 
-                self.last_ground_contact = get_data(data, "lastGroundContact")
+                self.last_ground_contact = get_data(data, "lastGroundStationContact")
                 # TODO: check if last_ground_contact is acceptable, otherwise return home 
                 
                 mission_id = get_data(data, "currentMissionId")

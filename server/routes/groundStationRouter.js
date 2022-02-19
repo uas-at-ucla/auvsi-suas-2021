@@ -4,14 +4,17 @@
 
 import express from 'express';
 
-export default class GroundStation {
-    constructor(interops_server) {
+export default class GroundStationRouter {
+    constructor(state) {
         this.router = express.Router();
-        this.interops_server = interops_server;
-        this.drone = undefined;
+        
+        this.interops_server = state.interops_server;
+        this.drone = state.drone;
+        this.ground_station = state.ground_station;
+        this.ground_vehicle = state.ground_vehicle;
 
         this.router.use((req, res, next) => {
-            this.last_contact = Date.now();
+            this.ground_station.last_contact = Date.now();
             next();
         });
 
@@ -30,13 +33,10 @@ export default class GroundStation {
     // Router methods
 
     get_heartbeat(req, res) {
-        res.json(this.drone.get_telemetry());
+        res.json({
+            lastDroneContact: this.drone.last_contact,
+            droneTelemetry: this.drone.get_telemetry(),
+        });
         res.status(200).end();
-    }
-
-    // Helper methods
-
-    set_drone(drone) {
-        this.drone = drone;
     }
 };

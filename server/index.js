@@ -3,10 +3,11 @@ import cors from 'cors';
 import { json } from 'express';
 import InteropServer from './interops.js';
 import 'dotenv/config'
+import {Drone, GroundStation, GroundVehicle} from './data.js';
 
 // Load in environment variables
 const port = process.env.PORT || 3000
-const interops_host = process.env.INTEROPS_HOST || "localhost:8000"
+const interops_host = process.env.INTEROPS_HOST || "http://localhost:8000"
 const username = process.env.INTEROPS_USERNAME || "testuser"
 const password = process.env.INTEROPS_PASSWORD || "testpass"
 
@@ -20,18 +21,27 @@ app.get('/ping', (req, res) => {
     res.status(200).send("Pong!");
 });
 
+const state = {
+    interops_server: interops_server,
+    drone: new Drone(),
+    ground_station: new GroundStation(),
+    ground_vehicle: new GroundVehicle,
+};
+
 // Communication with the drone
-import Drone from './routes/drone.js';
-const drone = new Drone(interops_server);
+import DroneRouter from './routes/droneRouter.js';
+const drone = new DroneRouter(state);
 app.use('/drone', drone.router);
 
 // Communication with the ground station
-import GroundStation from './routes/ground.js';
-const ground = new GroundStation(interops_server);
+import GroundStationRouter from './routes/groundStationRouter.js';
+const ground = new GroundStationRouter(state);
 app.use('/ground', ground.router);
 
-drone.set_ground_station(ground);
-ground.set_drone(drone);
+// Communication with the ground vehicle
+import GroundVehicleRouter from './routes/groundVehicleRouter.js';
+const vehicle = new GroundVehicleRouter(state);
+app.use('/ugv', vehicle.router);
 
 app.listen(port, () => {
     // Login into Interops

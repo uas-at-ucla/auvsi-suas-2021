@@ -1,36 +1,37 @@
 /*
 * Routes for the drone to communicate with the intermediary server.
-* Stores information about the drone.
 */
 
 import express from 'express';
 
-export default class Drone {
-    constructor(interops_server) {
+export default class DroneRouter {
+    constructor(state) {
         this.router = express.Router();
-        this.interops_server = interops_server;
-        this.ground_station = undefined;
 
-        this.current_mission = undefined;
-        this.mission_index = 1;
+        this.interops_server = state.interops_server;
+        this.drone = state.drone;
+        this.ground_station = state.ground_station;
+        this.ground_vehicle = state.ground_vehicle;
 
         this.router.use((req, res, next) => {
-            this.last_contact = Date.now();
+            this.drone.last_contact = Date.now();
             next();
         });
 
-        // Check heartbeat
-        this.router.get('/heartbeat', (res, req) => this.get_heartbeat_route(res, req));
-
         // Drone sends any drone updates, and server responds with any server updates
-        this.router.post('/heartbeat', (res, req) => this.post_heartbeat_route(res, req));
+        this.router.post('/heartbeat', (req, res) => this.post_heartbeat(req, res));
 
         // Post telemetry data
-        this.router.post('/telemetry', (res, req) => this.post_telemetry_route(res, req));
+        this.router.post('/telemetry', (req, res) => this.post_telemetry(req, res));
 
         // Get mission
-        this.router.get('/mission', async (res, req) => await this.get_mission_route(res, req));
+        this.router.get('/mission', async (req, res) => await this.get_mission(req, res));
 
+        // Get ugv telemtry
+        this.router.get('/ugvtelemetry', (req, res) => this.get_ugv_telemetry(req, res));
+
+
+        // TODO: check if this is needed
         this.router.get('/mission/:id', async (req, res) => {
             let index = parseInt(req.params.index, 10);
             if (this.interops_server.connected) {
@@ -50,40 +51,29 @@ export default class Drone {
     }
 
     // Router functions
-
-    get_heartbeat_route(req, res) {
-        res.json({
-            ground: Date.now(),
-            interops: this.interops_server.connected
-        });
-    }
-
-    post_heartbeat_route(req, res) {
+    post_heartbeat(req, res) {
         // Parse drone data
         let drone_data = req.body;
 
         // parse telemetry data
         let telemetry = drone_data.telemetryData;
         if (telemetry !== undefined)
-            this.set_telemetry(telemetry);
+            this.drone.set_telemetry(telemetry);
         
         // Prepare server data to send to drone
-        let ground_station_contact = undefined;
-        
-        if (this.ground_station !== undefined)
-            ground_station_contact = this.ground_station.last_contact
+        let ground_station_contact = this.ground_station.last_contact;
 
         let server_data = {
-            lastGroundContact: ground_station_contact,
+            lastGroundStationContact: ground_station_contact,
             interopsConnected: this.interops_server.connected,
-            currentMissionId: this.mission_index
+            currentMissionId: this.drone.get_mission_id,
         }
         res.status(200).json(server_data);
     }
 
-    post_telemetry_route(req, res) { 
+    post_telemetry(req, res) { 
         let telemtry_data = req.body;
-        this.set_telemetry(telemtry_data);
+        this.drone.set_telemetry(telemtry_data);
 
         if (this.interops_server.connected) {
             if (this.interops_server.post_telemetry(this.get_telemetry()))
@@ -94,44 +84,22 @@ export default class Drone {
         res.status(200).send("Telemetry data saved");
     }
 
-    async get_mission_route(req, res, id=-1) {
+    async get_mission(req, res, id=-1) {
         if (this.interops_server.connected) {
             let mission = await this.interops_server.get_mission(this.mission_index);
             //console.log(mission);
             if (mission) {
-                this.current_mission = mission;
+                this.drone.current_mission = mission;
                 console.log("DEBUG: Got current mission data from Interops Server");
             }
             else if (mission === undefined) {
                 console.log("DEBUG: Failed to get telemtry from Interops Server");
             }
         }
-        res.status(200).json(this.current_mission);
+        res.status(200).json(this.drone.current_mission);
     }
 
-    // Helper functions
-    
-    set_ground_station(station) {
-        this.ground_station = station;
-    }
-
-    get_telemetry() {
-        return {
-            latitude: this.latitude,
-            longitude: this.longitude,
-            altitude: this.altitude,
-            heading: this.heading,
-        };
-    }
-
-    set_telemetry(telemetry) {
-        if (telemetry.latitude !== undefined)
-            this.latitude = telemetry.latitude;
-        if (telemetry.longitude !== undefined)
-            this.longitude = telemetry.longitude;
-        if (telemetry.altitude !== undefined)
-            this.altitude = telemetry.altitude;
-        if (telemetry.heading !== undefined)
-            this.heading = telemetry.heading;
+    get_ugv_telemetry(req, res) {
+        res.status(200).json(this.ground_vehicle.get_telemetry())
     }
 };
