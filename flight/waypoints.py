@@ -10,14 +10,14 @@ class Node:
         self.yaw=yaw
         self.next=None
 class LinkedList:
-    def__init__(self):
-        self.head=None;
+    def __init__(self):
+        self.head=None
 
-async toLinkedList(lst,num):
+async def toLinkedList(lst,num):
     coords=LinkedList()
     coords=None
-    for i in range(0,n,1):
-        temp=Node(lst[i])
+    for i in range(0,num,1):
+        temp=lst(i)
         if(coords==None):
             coords=temp
         else:
@@ -34,10 +34,9 @@ async def waypoints(orig_list):
     
     i=len(orig_list)
     fin_list=toLinkedList(orig_list,i)
-    current=fin_list.head'
+    current=fin_list.head
     
     while current is not None:
-        drone.action.goto_location(current.lat, current.long, fin_list.flying_alt, fin_list.yaw)
+        drone.action.goto_location(current.lat, current.long, current.flying_alt, current.yaw)
         current=current.next
-
-
+    
