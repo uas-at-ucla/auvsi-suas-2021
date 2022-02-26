@@ -16,6 +16,9 @@ async def main():
     await drone.takeoff()
     await drone.goto(38.144500, -76.42942)
 
+    plist=[create_mission_point(10,10,20),create_mission_point(20,20,40),create_mission_point(40,40,80)]
+    await waypoints(plist, drone)
+    
     await drone.return_home()
     await drone.land()
 
