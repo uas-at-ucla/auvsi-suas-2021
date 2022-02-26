@@ -16,7 +16,7 @@ async def main():
         await asyncio.sleep(1)
         await drone.takeoff()
 
-    plist=[create_mission_point(10,10,20),create_mission_point(20,20,40),create_mission_point(40,40,80)]
+    plist=[create_mission_point(10,10,drone.ground_altitude+20),create_mission_point(20,20,drone.ground_altitude+40),create_mission_point(40,40,drone.ground_altitude+80)]
     await waypoints(plist, drone)
 
     await drone.return_home()
