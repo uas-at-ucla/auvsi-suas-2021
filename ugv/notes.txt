@@ -1,0 +1,11 @@
+UGVs and MAVSDK
+---------------
+UGVs can operate only in MANUAL and MISSION mode.
+    - MANUAL mode essentially means with a controller of sorts that someone has on hands.
+    - MISSION mode essentially means we give the UGV some coordinates to drive to.
+        *** MISSION mode will be the primary mode we will operate the UGV in. ***
+    - Source: https://docs.px4.io/master/en/getting_started/flight_modes.html#rover-boat
+
+"udp://:14540" is the URL to connect to the drone in the simulator.
+
+Maximum distance a waypoint coordinate can be from UGV is 900 meters [m].
