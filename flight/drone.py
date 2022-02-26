@@ -20,12 +20,20 @@ def get_list_of_points(data, key):
         points[i] = MissionPoint(points[i])
     return points
 
+def create_mission_point(lat,long,alt):
+    point=MissionPoint({})
+    point.latitude=lat
+    point.longitude=long
+    point.altitude=alt
+    return point
 
 class MissionPoint:
     def __init__(self, data):
+        self.next=None
         self.latitude = get_data(data, 'latitude')
         self.longitude = get_data(data, 'longitude')
         self.altitude = get_data(data, 'altitude')
+
 
 
 class Obstacle(MissionPoint):
@@ -117,7 +125,7 @@ class Drone:
                 data = result.json()
                 self.last_contact = datetime.now(timezone.utc).timestamp()
                 
-                self.last_ground_contact = get_data(data, "lastGroundStationContact")
+                self.last_ground_contact = get_data(data, "lastGroundContact")
                 # TODO: check if last_ground_contact is acceptable, otherwise return home 
                 
                 mission_id = get_data(data, "currentMissionId")
@@ -162,3 +170,4 @@ class Drone:
     
     async def land(self):
         await land(self.system, self.telemetry)
+
