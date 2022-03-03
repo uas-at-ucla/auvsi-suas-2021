@@ -17,44 +17,59 @@ def get_data(data, key, default=None):
 def get_list_of_points(data, key):
     points = get_data(data, key, [])
     for i in range(len(points)):
-        points[i] = MissionPoint(points[i])
+        points[i] = data_to_mission_point(points[i])
     return points
 
-def create_mission_point(lat,long,alt):
-    point=MissionPoint({})
-    point.latitude=lat
-    point.longitude=long
-    point.altitude=alt
-    return point
+
+def data_to_mission_point(data):
+    latitude = get_data(data, 'latitude')
+    longitude = get_data(data, 'longitude')
+    altitude = get_data(data, 'altitude')
+    return MissionPoint(latitude, longitude, altitude)
+
+
+def data_to_obstacle(data):
+    latitude = get_data(data, 'latitude')
+    longitude = get_data(data, 'longitude')
+    altitude = get_data(data, 'altitude')
+    radius = get_data(data, 'radius')
+    height = get_data(data, 'height')
+    return Obstacle(latitude, longitude, altitude, radius, height)
+
+
+def data_to_flyzone(data):
+    altitudeMin = get_data(data, 'altitudeMin')
+    altitudeMax = get_data(data, 'altitudeMax')
+    boundaryPoints = get_list_of_points(data, 'boundaryPoints')
+    return FlyZone(altitudeMin, altitudeMax, boundaryPoints)
+
 
 class MissionPoint:
-    def __init__(self, data):
-        self.next=None
-        self.latitude = get_data(data, 'latitude')
-        self.longitude = get_data(data, 'longitude')
-        self.altitude = get_data(data, 'altitude')
-
+    def __init__(self, latitude, longitude, altitude):
+        self.latitude = latitude
+        self.longitude = longitude
+        self.altitude = altitude
 
 
 class Obstacle(MissionPoint):
-    def __init__(self, data):
-        super().__init__(data)
-        self.radius = get_data(data, 'radius')
-        self.height = get_data(data, 'height')
+    def __init__(self, latitude, longitude, altitude, radius, height):
+        super().__init__(latitude, longitude, altitude)
+        self.radius = radius
+        self.height = height
 
 
 class FlyZone:
-    def __init__(self, data):
-        self.altitudeMin = get_data(data, 'altitudeMin')
-        self.altitudeMax = get_data(data, 'altitudeMax')
-        self.boundaryPoints = get_list_of_points(data, 'boundaryPoints')
+    def __init__(self, altitudeMin, altitudeMax, boundaryPoints):
+        self.altitudeMin = altitudeMin
+        self.altitudeMax = altitudeMax
+        self.boundaryPoints = boundaryPoints
 
 
 class Mission:
     def __init__(self, data):
         self.id = data['id']
         
-        self.lostCommsPos = MissionPoint(get_data(data, 'lostCommsPos', {}))
+        self.lostCommsPos = data_to_mission_point(get_data(data, 'lostCommsPos', {}))
         
         self.flyZones = []
         if ('flyZones' in data):
@@ -64,19 +79,19 @@ class Mission:
         self.waypoints = get_list_of_points(data, 'waypoints')
         self.searchGridPoints = get_list_of_points(data, 'searchGridPoints')
         
-        self.offAxisOdlcPos = MissionPoint(get_data(data, 'offAxisOdlcPos', {}))
-        self.emergentLastKnowPos = MissionPoint(get_data(data, 'emergentLastKnowPos', {}))
+        self.offAxisOdlcPos = data_to_mission_point(get_data(data, 'offAxisOdlcPos', {}))
+        self.emergentLastKnowPos = data_to_mission_point(get_data(data, 'emergentLastKnowPos', {}))
         
         self.airDropBoundaryPoints = get_list_of_points(data, 'airDropBoundaryPoints')
-        self.airDropsPos = MissionPoint(get_data(data, 'airDropPos', {}))
-        self.ugvDrivePos = MissionPoint(get_data(data, 'ugvDrivePos', {}))
+        self.airDropsPos = data_to_mission_point(get_data(data, 'airDropPos', {}))
+        self.ugvDrivePos = data_to_mission_point(get_data(data, 'ugvDrivePos', {}))
 
         self.stationaryObstacles = []
         if ('stationaryObstacles' in data):
             for obstacle in data['stationaryObstacles']:
-                self.stationaryObstacles.append(Obstacle(obstacle))
+                self.stationaryObstacles.append(data_to_obstacle(obstacle))
 
-        self.mapCenterpos = MissionPoint(get_data(data, 'mapCenterPos', {}))
+        self.mapCenterpos = data_to_mission_point(get_data(data, 'mapCenterPos', {}))
         self.mapHeight = get_data(data, 'mapHeight')
 
 

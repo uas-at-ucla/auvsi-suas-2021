@@ -67,6 +67,7 @@ class TelemetryData:
             self.a_velocity = a_velocity
 
 
+    # TODO: convert to ft or kn per s2
     async def acceleration(self, drone: System):
         async for acc in drone.telemetry.AccelerationFrd():
             self.forward = acc.forward_m_s2

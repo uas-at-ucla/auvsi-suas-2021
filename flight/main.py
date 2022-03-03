@@ -1,6 +1,6 @@
 import asyncio
 from movement import *
-from waypoints import waypoints
+from waypoints import *
 from drone import MissionPoint
 from drone import create_mission_point
 from drone import Drone
@@ -14,10 +14,16 @@ async def main():
 
     while not drone.telemetry.is_landed:
         await asyncio.sleep(1)
-        await drone.takeoff()
+    
+    await drone.takeoff()
 
-    plist=[create_mission_point(10,10,drone.ground_altitude+20),create_mission_point(20,20,drone.ground_altitude+40),create_mission_point(40,40,drone.ground_altitude+80)]
-    await waypoints(plist, drone)
+    plist=[
+        MissionPoint(10, 10, drone.ground_altitude + 20), 
+        MissionPoint(20, 20, drone.ground_altitude + 40),
+        MissionPoint(40, 40, drone.ground_altitude + 80)
+    ]
+
+    await goto_waypoints(LinkedList(plist), drone)
 
     await drone.return_home()
     await drone.land()
