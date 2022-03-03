@@ -31,7 +31,7 @@ export default class DroneRouter {
         this.router.get('/ugvtelemetry', (req, res) => this.get_ugv_telemetry(req, res));
 
 
-        // TODO: check if this is needed
+        /** @todo check if this is needed */
         this.router.get('/mission/:id', async (req, res) => {
             let index = parseInt(req.params.index, 10);
             if (this.interops_server.connected) {
