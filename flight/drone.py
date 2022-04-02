@@ -144,14 +144,14 @@ class Drone:
 
                     # Issue: acceleration() function has an issue.
                     "a_velocity": {
-                        "roll_rad_s": None, #self.telemetry.a_velocity.roll_rad_s,
-                        "pitch_rad_s": None, #self.telemetry.a_velocity.pitch_rad_s,
-                        "yaw_rad_s": None #self.telemetry.a_velocity.yaw_rad_s
+                        "roll_rad_s": 0, #self.telemetry.a_velocity.roll_rad_s,
+                        "pitch_rad_s": 0, #self.telemetry.a_velocity.pitch_rad_s,
+                        "yaw_rad_s": 0 #self.telemetry.a_velocity.yaw_rad_s
                     },
-                    "forward": self.telemetry.forward,
-                    "right": self.telemetry.right,
-                    "down": self.telemetry.down,
-                    #"battery": self.telemetry.battery # Issue: battery is not JSON serializable
+                    "forward": 0, #self.telemetry.forward,
+                    "right": 0, #self.telemetry.right,
+                    "down": 0, #self.telemetry.down,
+                    "battery": 1.0, #self.telemetry.battery # Issue: battery is not JSON serializable
                 }
             })
             
