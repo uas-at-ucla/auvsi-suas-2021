@@ -101,8 +101,8 @@ class Drone:
         asyncio.create_task(self.telemetry.position(self.system))
         #asyncio.create_task(self.telemetry.body(self.system)) # Issue: telemetry object does not have AngularVelocityBody()
         asyncio.create_task(self.telemetry.landed(self.system))
-        #asyncio.create_task(self.telemetry.air(self.system))
-        #asyncio.create_task(self.telemetry.ground_velocity(self.system)) # Issue: VelocityNed is a vector not a float
+        asyncio.create_task(self.telemetry.air(self.system))
+        asyncio.create_task(self.telemetry.ground_velocity(self.system)) # Issue: VelocityNed is a vector not a float
         asyncio.create_task(self.telemetry.angular_velocity(self.system))
         #asyncio.create_task(self.telemetry.acceleration(self.system)) # Issue: telemetry object does not have AccelerationFrd()
         asyncio.create_task(self.telemetry.battery_status(self.system))
@@ -128,18 +128,25 @@ class Drone:
                     "heading": self.telemetry.yaw,
                     #"is_in_air": self.telemetry.is_in_air,  # Enum?
                     #"is_landed": self.telemetry.is_landed,  # Enum
+                    
+                    # Change later
+                    "is_in_air": None,
+                    "is_landed": None,
+                    
                     "roll": self.telemetry.roll,
                     "pitch": self.telemetry.pitch,
                     "yaw": self.telemetry.yaw,
                     "g_velocity": {
-                        "north_m_s": self.telemetry.g_velocity.north_m_s,
-                        "east_m_s": self.telemetry.g_velocity.east_m_s,
-                        "down_m_s": self.telemetry.g_velocity.down_m_s,
+                        "north_m_s": self.telemetry.g_velocity.north_m_s if self.telemetry.g_velocity is not None else 0,
+                        "east_m_s": self.telemetry.g_velocity.east_m_s if self.telemetry.g_velocity is not None else 0,
+                        "down_m_s": self.telemetry.g_velocity.down_m_s if self.telemetry.g_velocity is not None else 0,
                     },
+
+                    # Issue: acceleration() function has an issue.
                     "a_velocity": {
-                        "roll_rad_s": self.telemetry.a_velocity.roll_rad_s,
-                        "pitch_rad_s": self.telemetry.a_velocity.pitch_rad_s,
-                        "yaw_rad_s": self.telemetry.a_velocity.yaw_rad_s
+                        "roll_rad_s": None, #self.telemetry.a_velocity.roll_rad_s,
+                        "pitch_rad_s": None, #self.telemetry.a_velocity.pitch_rad_s,
+                        "yaw_rad_s": None #self.telemetry.a_velocity.yaw_rad_s
                     },
                     "forward": self.telemetry.forward,
                     "right": self.telemetry.right,

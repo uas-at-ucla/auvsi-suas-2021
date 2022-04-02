@@ -59,7 +59,8 @@ class TelemetryData:
 
     async def ground_velocity(self, drone: System):
         async for g_velocity in drone.telemetry.velocity_ned():
-            self.g_velocity = mps_to_kn(g_velocity)
+            # self.g_velocity = mps_to_kn(g_velocity)  # Issue: g_velocity is a VelocityNed object, not float
+            self.g_velocity = g_velocity
 
 
     async def angular_velocity(self, drone: System):
@@ -68,6 +69,8 @@ class TelemetryData:
 
 
     async def acceleration(self, drone: System):
+        # Issue: AccelerationFrd() is a class, not a function. Need to find a function
+        #        that gives acceleration.
         async for acc in drone.telemetry.AccelerationFrd():
             self.forward = acc.forward_m_s2
             self.right = acc.right_m_s2
