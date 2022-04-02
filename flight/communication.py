@@ -25,12 +25,30 @@ def test_connection():
         return False
 
 async def telemetry_heartbeat(data: TelemetryData):
+    # NOTE: Currently, to access telemetry data you will need to use the
+    #       /ground/heartbeat endpoint.
+
+    # NOTE: Did not include is_in_air or is_landed because may not be
+    #       necessary
+    
     while True:
         result = requests.post(f"{HOST}/drone/telemetry", json={
             "latitude": data.latitude,
             "longitude": data.longitude,
-            "altitude": data.relative_altitude,
-            "heading": data.yaw
+            "absolute_altitude": data.absolute_altitude,
+            "relative_altitude": data.relative_altitude,
+            "heading": data.yaw,
+            "is_in_air": data.is_in_air,
+            "is_landed": data.is_landed,
+            "roll": data.roll,
+            "pitch": data.pitch,
+            "yaw": data.yaw,
+            "g_velocity": data.g_velocity,
+            "a_velocity": data.a_velocity,
+            "forward": data.forward,
+            "right": data.right,
+            "down": data.down,
+            "battery": data.battery
         })
         print(result.status_code, result.text)
         await asyncio.sleep(1)

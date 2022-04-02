@@ -1,3 +1,6 @@
+# SOON TO BE DEPRECIATED AS WAYPOINTS FUNCTION IS NOW A FUNCTION IN THE
+# "Drone" CLASS
+
 import asyncio
 from mavsdk import System
 from telemetry import TelemetryData
