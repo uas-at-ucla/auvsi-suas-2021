@@ -8,6 +8,7 @@ from typing import Tuple, Union
 COORD_EPSILON = 0.000005
 ALTITUDE_EPSILON = 1
 
+
 def mps_to_kn(num):
     return num * 1.944
 
@@ -25,10 +26,9 @@ def ft_to_m(num):
 
 
 def compare_coords(
-    coords1: Tuple[Union[float, None], Union[float, None]],
-    coords2: Tuple[Union[float, None], Union[float, None]],
-    epsilon: float=COORD_EPSILON) -> bool:
-
+        coords1: Tuple[Union[float, None], Union[float, None]],
+        coords2: Tuple[Union[float, None], Union[float, None]],
+        epsilon: float = COORD_EPSILON) -> bool:
     """
     Compares two coordinates using an epsilon.
     Coordinates should be a tuple in the form (lat, lon)
@@ -47,25 +47,26 @@ def compare_coords(
     Whether the two sets of coordinates are within an epsilon of each other.
     """
 
-    lat_check = coords1[0] is None or coords2[0] is None or abs(coords1[0] - coords2[0]) <= epsilon
-    lon_check = coords1[1] is None or coords2[1] is None or abs(coords1[1] - coords2[1]) <= epsilon
+    lat_check = coords1[0] is None or coords2[0] is None or abs(
+        coords1[0] - coords2[0]) <= epsilon
+    lon_check = coords1[1] is None or coords2[1] is None or abs(
+        coords1[1] - coords2[1]) <= epsilon
     return lat_check and lon_check
 
 
 def compare_altitude(
-    altitude1: Union[float, None],
-    altitude2: Union[float, None],
-    epsilon: float=ALTITUDE_EPSILON) -> bool:
+        altitude1: Union[float, None],
+        altitude2: Union[float, None],
+        epsilon: float = ALTITUDE_EPSILON) -> bool:
 
     return altitude1 is None or altitude2 is None or abs(altitude1 - altitude2) <= epsilon
 
 
 def compare_position(
-    pos1: Tuple[Union[float, None], Union[float, None], Union[float, None]],
-    pos2: Tuple[Union[float, None], Union[float, None], Union[float, None]],
-    coord_epsilon: float=COORD_EPSILON,
-    altitude_epsilon: float=ALTITUDE_EPSILON) -> bool:
-
+        pos1: Tuple[Union[float, None], Union[float, None], Union[float, None]],
+        pos2: Tuple[Union[float, None], Union[float, None], Union[float, None]],
+        coord_epsilon: float = COORD_EPSILON,
+        altitude_epsilon: float = ALTITUDE_EPSILON) -> bool:
     """
     Compares two positions using an epsilon.
     Positions should be a tuple in the form (lat, lon, alt)

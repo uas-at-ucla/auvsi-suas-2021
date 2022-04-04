@@ -6,6 +6,7 @@ from drone import MissionPoint
 from drone import create_mission_point
 from drone import Drone
 
+
 async def main():
     drone = Drone()
     await drone.connect()
@@ -15,16 +16,20 @@ async def main():
 
     while not drone.telemetry.is_landed:
         await asyncio.sleep(1)
-    
+
     await drone.takeoff()
 
     print(drone.ground_altitude)
-    point1 = MissionPoint(38.14165971518743, -76.42502117913004, drone.telemetry.absolute_altitude)
-    point2 = MissionPoint(38.14798800146675, -76.41875553886354, drone.telemetry.absolute_altitude)
-    point3 = MissionPoint(38.15240903840184, -76.43581438821921, drone.telemetry.absolute_altitude)
-    point4 = MissionPoint(38.142351634547964, -76.43441963952976, drone.telemetry.absolute_altitude)
-    plist=[point1, point2, point3, point4]
-    
+    point1 = MissionPoint(38.14165971518743, -
+                          76.42502117913004, drone.telemetry.absolute_altitude)
+    point2 = MissionPoint(38.14798800146675, -
+                          76.41875553886354, drone.telemetry.absolute_altitude)
+    point3 = MissionPoint(38.15240903840184, -
+                          76.43581438821921, drone.telemetry.absolute_altitude)
+    point4 = MissionPoint(38.142351634547964, -
+                          76.43441963952976, drone.telemetry.absolute_altitude)
+    plist = [point1, point2, point3, point4]
+
     # TODO: Link-up drone telemetry to intermediary server so Garni can get the drone
     #       GPS and telemetry data for ground station map.
 
@@ -32,7 +37,7 @@ async def main():
     # Moved the waypoints function into Drone class
     #! ISSUE: Apparently, the drone will decrease altitude drastically when
     #        the altitude is set to "drone.ground_altitude".
-    #        
+    #
     #        Printing "drone.ground_altitude" after takeoff resulted in this
     #        number: 1601.3413731384278
     #        The drone takeoff altitude is 100 feet at the time of testing. This
@@ -48,7 +53,7 @@ async def main():
     #           3. drone.py -> Drone -> goto
     #
     #        POSSIBLE SOLUTION: Seems to work when we use the drone's absolute altitude.
-    #        
+    #
     #!        ISSUE: I noticed that there seems to be a mixing of units in the code.
     #!               Will need to check competition rules to see what units to work with,
     #!               adjust accordingly, and document the code.

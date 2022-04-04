@@ -1,5 +1,5 @@
 """
-Module for communicating with the Ground Station
+Module for communicating with the Intermediary Server
 """
 import asyncio
 from datetime import datetime
@@ -8,14 +8,12 @@ from telemetry import TelemetryData
 from mavsdk import System
 import requests
 
-HEARTBEAT_RATE = 0.5
-RTH_TIMEOUT = 30
-LAND_TIMEOUT = 180
 
-HOST = "http://localhost:3000"
+HOST = "http://localhost:3000" # TODO: Use config file for HOST name
 
 heartbeat_established = False
 last_heartbeat = datetime.now()
+
 
 def test_connection():
     try:
@@ -23,3 +21,49 @@ def test_connection():
         return result.ok
     except:
         return False
+
+
+async def post_heartbeat(drone):
+    # NOTE: Did not include is_in_air or is_landed because may not be
+    #       necessary
+    result = requests.post(f"{HOST}/drone/heartbeat", json={
+        "telemetryData": {
+            "latitude": drone.telemetry.latitude,
+            "longitude": drone.telemetry.longitude,
+            "absolute_altitude": drone.telemetry.absolute_altitude,
+            "relative_altitude": drone.telemetry.relative_altitude,
+            "heading": drone.telemetry.yaw,
+            # "is_in_air": drone.telemetry.is_in_air,  # Enum?
+            # "is_landed": drone.telemetry.is_landed,  # Enum
+            "roll": drone.telemetry.roll,
+            "pitch": drone.telemetry.pitch,
+            "yaw": drone.telemetry.yaw,
+            "g_velocity": {
+                "north_m_s": drone.telemetry.g_velocity.north_m_s,
+                "east_m_s": drone.telemetry.g_velocity.east_m_s,
+                "down_m_s": drone.telemetry.g_velocity.down_m_s,
+            },
+            "a_velocity": {
+                "roll_rad_s": drone.telemetry.a_velocity.roll_rad_s,
+                "pitch_rad_s": drone.telemetry.a_velocity.pitch_rad_s,
+                "yaw_rad_s": drone.telemetry.a_velocity.yaw_rad_s
+            },
+            "forward": drone.telemetry.forward,
+            "right": drone.telemetry.right,
+            "down": drone.telemetry.down,
+            # "battery": drone.telemetry.battery # Issue: battery is not JSON serializable
+        }
+    })
+
+    if (result.ok):
+        return result.json()
+    else:
+        return None
+
+
+async def get_mission(drone):
+    result = requests.get(f"{HOST}/drone/mission")
+    if (result.ok):
+        return result.json()
+    else:
+        return None
