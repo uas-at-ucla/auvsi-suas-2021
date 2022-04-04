@@ -23,14 +23,3 @@ def test_connection():
         return result.ok
     except:
         return False
-
-async def telemetry_heartbeat(data: TelemetryData):
-    while True:
-        result = requests.post(f"{HOST}/drone/telemetry", json={
-            "latitude": data.latitude,
-            "longitude": data.longitude,
-            "altitude": data.relative_altitude,
-            "heading": data.yaw
-        })
-        print(result.status_code, result.text)
-        await asyncio.sleep(1)

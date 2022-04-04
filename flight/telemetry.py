@@ -41,7 +41,7 @@ class TelemetryData:
 
 
     async def body(self, drone: System):
-        async for turn in drone.telemetry.AngularVelocityBody():
+        async for turn in drone.telemetry. attitude_angular_velocity_body():
             self.roll = turn.roll_rad_s
             self.pitch = turn.pitch_rad_s
             self.yaw = turn.yaw_rad_s

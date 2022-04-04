@@ -97,6 +97,9 @@ Gets the current mission (see interops server for mission data structure)
 ### GET /drone/mission/:id
 Get the mission with specified id (see interops server for mission data structure)
 
+### GET /drone/ugvtelemetry
+Get ugv telemetry for the drone
+
 ## /ground
 routes which the ground station should use.
 
@@ -115,3 +118,12 @@ Returns
 
 ### GET /ground/mission
 Gets the current mission (see interops server for mission data structure)
+
+## /ugv
+routes which the UGV should use.
+
+### POST /ugv/heartbeat
+Updates the server with the current UGV's telemetry
+
+### GET /ugv/mission
+Gets the current ugv mission data.
