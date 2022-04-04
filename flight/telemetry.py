@@ -11,7 +11,7 @@ class TelemetryData:
     """
     Stores telemetry data.
     """
-    # Property:                  # Units:
+    # Property:                 # Units:
     latitude = None             # degrees
     longitude = None            # degrees
     absolute_altitude = None    # feet

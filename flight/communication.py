@@ -7,6 +7,7 @@ from typing import Callable
 from telemetry import TelemetryData
 from mavsdk import System
 import requests
+from utils import ft_to_m
 
 
 HOST = "http://localhost:3000" # TODO: Use config file for HOST name
@@ -30,8 +31,8 @@ async def post_heartbeat(drone):
         "telemetryData": {
             "latitude": drone.telemetry.latitude,
             "longitude": drone.telemetry.longitude,
-            "absolute_altitude": drone.telemetry.absolute_altitude,
-            "relative_altitude": drone.telemetry.relative_altitude,
+            "absolute_altitude": ft_to_m(drone.telemetry.absolute_altitude),
+            "relative_altitude": ft_to_m(drone.telemetry.relative_altitude),
             "heading": drone.telemetry.yaw,
             # "is_in_air": drone.telemetry.is_in_air,  # Enum?
             # "is_landed": drone.telemetry.is_landed,  # Enum
@@ -42,12 +43,12 @@ async def post_heartbeat(drone):
                 "north_m_s": drone.telemetry.g_velocity.north_m_s,
                 "east_m_s": drone.telemetry.g_velocity.east_m_s,
                 "down_m_s": drone.telemetry.g_velocity.down_m_s,
-            },
+            } if drone.telemetry.g_velocity is not None else None,
             "a_velocity": {
                 "roll_rad_s": drone.telemetry.a_velocity.roll_rad_s,
                 "pitch_rad_s": drone.telemetry.a_velocity.pitch_rad_s,
                 "yaw_rad_s": drone.telemetry.a_velocity.yaw_rad_s
-            },
+            } if drone.telemetry.a_velocity is not None else None,
             "forward": drone.telemetry.forward,
             "right": drone.telemetry.right,
             "down": drone.telemetry.down,

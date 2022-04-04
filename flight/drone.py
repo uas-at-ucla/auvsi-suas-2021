@@ -158,7 +158,7 @@ class Drone:
     async def _heartbeat(self):
         '''Uploads data to the intermediary server and parses the response'''
         while True:
-            data = comms.post_heartbeat(self)
+            data = await comms.post_heartbeat(self)
             if data is not None:
                 self.last_contact = datetime.now(timezone.utc).timestamp()
 
@@ -172,7 +172,7 @@ class Drone:
 
     async def _get_mission(self):
         '''Grabs mission data from the intermediary server and parses the response'''
-        data = comms.get_mission(self)
+        data = await comms.get_mission(self)
         if data is not None:
             self.mission = Mission(data)
 
