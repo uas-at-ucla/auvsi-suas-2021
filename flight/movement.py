@@ -1,5 +1,3 @@
-# TODO: Need documentations
-
 from mavsdk import System
 from telemetry import TelemetryData
 from utils import compare_altitude, compare_position, mps_to_kn, m_to_ft, ft_to_m, kn_to_mps
