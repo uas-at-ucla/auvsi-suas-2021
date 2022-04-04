@@ -31,8 +31,8 @@ async def post_heartbeat(drone):
         "telemetryData": {
             "latitude": drone.telemetry.latitude,
             "longitude": drone.telemetry.longitude,
-            "absolute_altitude": ft_to_m(drone.telemetry.absolute_altitude),
-            "relative_altitude": ft_to_m(drone.telemetry.relative_altitude),
+            "absolute_altitude": drone.telemetry.absolute_altitude,
+            "relative_altitude": drone.telemetry.relative_altitude,
             "heading": drone.telemetry.yaw,
             # "is_in_air": drone.telemetry.is_in_air,  # Enum?
             # "is_landed": drone.telemetry.is_landed,  # Enum
