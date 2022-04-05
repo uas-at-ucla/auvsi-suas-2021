@@ -86,7 +86,7 @@ class TelemetryData:
     async def battery_status(self, drone: System):
         async for battery in drone.telemetry.battery():
             self.battery_volts = battery.voltage_v
-            self.battery_volts = battery.remaining_percent
+            self.battery_remaining = battery.remaining_percent
 
 
 # telemetry data needed

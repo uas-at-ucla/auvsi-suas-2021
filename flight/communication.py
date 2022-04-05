@@ -39,16 +39,16 @@ async def post_heartbeat(drone):
             "roll": drone.telemetry.roll,
             "pitch": drone.telemetry.pitch,
             "yaw": drone.telemetry.yaw,
-            "g_velocity": {
-                "north_kn": drone.telemetry.g_velocity.north_kn,
-                "east_kn": drone.telemetry.g_velocity.east_kn,
-                "down_kn": drone.telemetry.g_velocity.down_kn,
-            } if drone.telemetry.g_velocity is not None else None,
-            "a_velocity": {
-                "roll_rad_s": drone.telemetry.a_velocity.roll_rad_s,
-                "pitch_rad_s": drone.telemetry.a_velocity.pitch_rad_s,
-                "yaw_rad_s": drone.telemetry.a_velocity.yaw_rad_s
-            } if drone.telemetry.a_velocity is not None else None,
+            "ground_velocity": {
+                "north_kn": drone.telemetry.ground_velocity.north_kn,
+                "east_kn": drone.telemetry.ground_velocity.east_kn,
+                "down_kn": drone.telemetry.ground_velocity.down_kn,
+            } if drone.telemetry.ground_velocity is not None else None,
+            "angular_velocity": {
+                "roll_rad_s": drone.telemetry.angular_velocity.roll_rad_s,
+                "pitch_rad_s": drone.telemetry.angular_velocity.pitch_rad_s,
+                "yaw_rad_s": drone.telemetry.angular_velocity.yaw_rad_s
+            } if drone.telemetry.angular_velocity is not None else None,
             "forward": drone.telemetry.forward,
             "right": drone.telemetry.right,
             "down": drone.telemetry.down,

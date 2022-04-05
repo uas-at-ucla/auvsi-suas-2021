@@ -7,6 +7,7 @@ async def main():
     drone = Drone()
     await drone.connect()
 
+    print("Starting telemetry")
     drone.start_telemetry()
 
     print("Waiting for telemetry... ", end="")
