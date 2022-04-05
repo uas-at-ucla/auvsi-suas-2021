@@ -24,7 +24,7 @@ class TelemetryData:
     absolute_altitude = None    # feet
     relative_altitude = None    # feet
     is_in_air = None            # bool
-    is_landed = None            # bool
+    is_landed = None            # mavsdk.telemetry.LandedState enum
     roll = None                 # degrees
     pitch = None                # degrees
     yaw = None                  # degrees

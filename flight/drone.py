@@ -187,18 +187,18 @@ class Drone:
         self.ground_altitude = self.telemetry.absolute_altitude
         await takeoff(self.system, self.telemetry)
 
-    async def goto(self, latitude, longitude, altitude=None, yaw=0):
+    async def goto(self, latitude, longitude, relative_altitude=None, yaw=0):
         '''Goes to a specific location, return when arrived at location'''
 
-        if altitude is None:
-            altitude = self.telemetry.absolute_altitude
+        if relative_altitude is None:
+            relative_altitude = self.telemetry.relative_altitude
 
         await goto_location(
             self.system,
             self.telemetry,
             latitude,
             longitude,
-            altitude,
+            relative_altitude + self.ground_altitude,
             yaw)
 
     async def traverse_waypoints(self, points):

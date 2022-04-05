@@ -87,7 +87,7 @@ async def goto_location(
             ), (lat, lon, alt))):
 
         print(
-            f"LAT: {telemetry_data.latitude}, LON: {telemetry_data.longitude}, ALT: {telemetry_data.absolute_altitude}")
+            f"LAT: {telemetry_data.latitude}, LON: {telemetry_data.longitude}, REL_ALT: {telemetry_data.relative_altitude}")
         await asyncio.sleep(UPDATE_TIME)
 
     print("Target location reached")
