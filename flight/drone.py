@@ -139,18 +139,33 @@ class Drone:
                 break
         print("Drone Connected Successfully!")
 
-    # TODO: Include options parameter to enable/disable certain telemetry metrics
-    def start_telemetry(self):
+    def start_telemetry(self,
+        use_position=True,
+        use_body=True,
+        use_landed=True,
+        use_air=True,
+        use_ground_velocity=True,
+        use_angular_velocity=True,
+        use_acceleration=True,
+        use_battery_status=True):
         '''Starts all the tasks for collecting telemetry data'''
 
-        asyncio.create_task(self.telemetry.position(self.system))
-        asyncio.create_task(self.telemetry.body(self.system))
-        asyncio.create_task(self.telemetry.landed(self.system))
-        asyncio.create_task(self.telemetry.air(self.system))
-        asyncio.create_task(self.telemetry.ground_velocity(self.system))
-        asyncio.create_task(self.telemetry.angular_velocity(self.system))
-        asyncio.create_task(self.telemetry.acceleration(self.system))
-        asyncio.create_task(self.telemetry.battery_status(self.system))
+        if use_position:
+            asyncio.create_task(self.telemetry.position(self.system))
+        if use_body:
+            asyncio.create_task(self.telemetry.body(self.system))
+        if use_landed:
+            asyncio.create_task(self.telemetry.landed(self.system))
+        if use_air:
+            asyncio.create_task(self.telemetry.air(self.system))
+        if use_ground_velocity:
+            asyncio.create_task(self.telemetry.ground_velocity(self.system))
+        if use_angular_velocity:
+            asyncio.create_task(self.telemetry.angular_velocity(self.system))
+        if use_acceleration:
+            asyncio.create_task(self.telemetry.acceleration(self.system))
+        if use_battery_status:
+            asyncio.create_task(self.telemetry.battery_status(self.system))
 
     def start_heartbeat(self):
         '''Starts the heartbeat with the intermediary server'''

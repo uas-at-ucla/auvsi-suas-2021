@@ -2,11 +2,12 @@ from mavsdk import System
 from telemetry import TelemetryData
 from utils import compare_altitude, compare_position, mps_to_kn, m_to_ft, ft_to_m, kn_to_mps
 import asyncio
+from decouple import config
 
 UPDATE_TIME = 1
 # TODO: Use config file or something for HOME coords
-HOME_LAT = 38.144478
-HOME_LON = -76.42942
+HOME_LAT = float(config("HOME_LAT"))
+HOME_LON = float(config("HOME_LON"))
 
 
 async def takeoff(

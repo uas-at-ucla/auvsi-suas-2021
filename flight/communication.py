@@ -1,16 +1,11 @@
 """
 Module for communicating with the Intermediary Server
 """
-import asyncio
 from datetime import datetime
-from typing import Callable
-from telemetry import TelemetryData
-from mavsdk import System
 import requests
-from utils import ft_to_m
+from decouple import config
 
-
-HOST = "http://localhost:3000" # TODO: Use config file for HOST name
+HOST = config("HOST")
 
 heartbeat_established = False
 last_heartbeat = datetime.now()
@@ -34,7 +29,7 @@ async def post_heartbeat(drone):
             "absolute_altitude": drone.telemetry.absolute_altitude,
             "relative_altitude": drone.telemetry.relative_altitude,
             "heading": drone.telemetry.yaw,
-            # "is_in_air": drone.telemetry.is_in_air,  # Enum?
+            "is_in_air": drone.telemetry.is_in_air,
             # "is_landed": drone.telemetry.is_landed,  # Enum
             "roll": drone.telemetry.roll,
             "pitch": drone.telemetry.pitch,
