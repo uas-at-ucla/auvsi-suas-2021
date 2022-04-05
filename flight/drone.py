@@ -115,10 +115,10 @@ class Mission:
             get_data(data, 'mapCenterPos', {}))
         self.mapHeight = get_data(data, 'mapHeight')
 
+
 # =================================================================
 #                       Drone Object
 # =================================================================
-
 
 class Drone:
     def __init__(self):
@@ -131,6 +131,7 @@ class Drone:
 
     async def connect(self):
         '''Connects the Drone to the MAVSDK interface'''
+
         await self.system.connect()
         print("Waiting for drone to connect...")
         async for state in self.system.core.connection_state():
@@ -141,22 +142,25 @@ class Drone:
     # TODO: Include options parameter to enable/disable certain telemetry metrics
     def start_telemetry(self):
         '''Starts all the tasks for collecting telemetry data'''
+
         asyncio.create_task(self.telemetry.position(self.system))
-        # asyncio.create_task(self.telemetry.body(self.system)) # Issue: telemetry object does not have AngularVelocityBody()
+        asyncio.create_task(self.telemetry.body(self.system))
         asyncio.create_task(self.telemetry.landed(self.system))
-        # asyncio.create_task(self.telemetry.air(self.system))
-        # asyncio.create_task(self.telemetry.ground_velocity(self.system)) # Issue: VelocityNed is a vector not a float
+        asyncio.create_task(self.telemetry.air(self.system))
+        asyncio.create_task(self.telemetry.ground_velocity(self.system))
         asyncio.create_task(self.telemetry.angular_velocity(self.system))
-        # asyncio.create_task(self.telemetry.acceleration(self.system)) # Issue: telemetry object does not have AccelerationFrd()
+        asyncio.create_task(self.telemetry.acceleration(self.system))
         asyncio.create_task(self.telemetry.battery_status(self.system))
 
     def start_heartbeat(self):
         '''Starts the heartbeat with the intermediary server'''
+
         if (comms.test_connection()):
             asyncio.create_task(self._heartbeat())
 
     async def _heartbeat(self):
         '''Uploads data to the intermediary server and parses the response'''
+
         while True:
             data = await comms.post_heartbeat(self)
             if data is not None:
@@ -172,17 +176,20 @@ class Drone:
 
     async def _get_mission(self):
         '''Grabs mission data from the intermediary server and parses the response'''
+
         data = await comms.get_mission(self)
         if data is not None:
             self.mission = Mission(data)
 
     async def takeoff(self):
         '''Starts the takeoff procedure, returns when takeoff is finished'''
+
         self.ground_altitude = self.telemetry.absolute_altitude
         await takeoff(self.system, self.telemetry)
 
     async def goto(self, latitude, longitude, altitude=None, yaw=0):
         '''Goes to a specific location, return when arrived at location'''
+
         if altitude is None:
             altitude = self.telemetry.absolute_altitude
 
@@ -200,6 +207,7 @@ class Drone:
             Parameters:
                 points - list of MissionPoints
         '''
+
         for point in points:
             # TODO: Add pathfinding + smoothing algorithm
             await self.goto(point.latitude, point.longitude, point.altitude, 0)
@@ -210,8 +218,10 @@ class Drone:
 
     async def return_home(self):
         '''Start procedure to return home, returns when arrived'''
+
         await return_to_home(self.system, self.telemetry)
 
     async def land(self):
         '''Start procedure to land, returns when landed'''
+
         await land(self.system, self.telemetry)

@@ -7,6 +7,13 @@ from mavsdk import System
 from utils import mps_to_kn, m_to_ft
 
 
+class VelocityNedKnots:
+    def __init__(self, north_kn, east_kn, down_kn):
+        self.north_kn = north_kn
+        self.east_kn = east_kn
+        self.down_kn = down_kn
+
+
 class TelemetryData:
     """
     Stores telemetry data.
@@ -18,15 +25,16 @@ class TelemetryData:
     relative_altitude = None    # feet
     is_in_air = None            # bool
     is_landed = None            # bool
-    roll = None                 # 
-    pitch = None                #
-    yaw = None                  #
-    g_velocity = None           #
-    a_velocity = None           #
-    forward = None              #
-    right = None                #
-    down = None                 #
-    battery = None              #
+    roll = None                 # degrees
+    pitch = None                # degrees
+    yaw = None                  # degrees
+    ground_velocity = None      # knots
+    angular_velocity = None     # rad/s
+    forward = None              # TBD
+    right = None                # TBD
+    down = None                 # TBD
+    battery_volts = None        # volts
+    battery_remaining = None    # percent
 
     async def position(self, drone: System):
         """
@@ -42,10 +50,10 @@ class TelemetryData:
             self.relative_altitude = m_to_ft(self.relative_altitude)
 
     async def body(self, drone: System):
-        async for turn in drone.telemetry. attitude_angular_velocity_body():
-            self.roll = turn.roll_rad_s
-            self.pitch = turn.pitch_rad_s
-            self.yaw = turn.yaw_rad_s
+        async for turn in drone.telemetry.attitude_euler():
+            self.roll = turn.roll_deg
+            self.pitch = turn.pitch_deg
+            self.yaw = turn.yaw_deg
 
     async def landed(self, drone: System):
         async for is_landed in drone.telemetry.landed_state():
@@ -57,23 +65,28 @@ class TelemetryData:
 
     async def ground_velocity(self, drone: System):
         async for g_velocity in drone.telemetry.velocity_ned():
-            self.g_velocity = mps_to_kn(g_velocity)
+            self.ground_velocity = VelocityNedKnots(
+                mps_to_kn(g_velocity.north_m_s),
+                mps_to_kn(g_velocity.east_m_s),
+                mps_to_kn(g_velocity.down_m_s),
+            )
 
     async def angular_velocity(self, drone: System):
         async for a_velocity in drone.telemetry.attitude_angular_velocity_body():
-            self.a_velocity = a_velocity
+            self.angular_velocity = a_velocity
 
     # TODO: convert to ft or kn per s2
-
     async def acceleration(self, drone: System):
-        async for acc in drone.telemetry.AccelerationFrd():
+        async for imu in drone.telemetry.imu():
+            acc = imu.acceleration_frd
             self.forward = acc.forward_m_s2
             self.right = acc.right_m_s2
             self.down = acc.down_m_s2
 
     async def battery_status(self, drone: System):
         async for battery in drone.telemetry.battery():
-            self.battery = battery
+            self.battery_volts = battery.voltage_v
+            self.battery_volts = battery.remaining_percent
 
 
 # telemetry data needed

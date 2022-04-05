@@ -40,9 +40,9 @@ async def post_heartbeat(drone):
             "pitch": drone.telemetry.pitch,
             "yaw": drone.telemetry.yaw,
             "g_velocity": {
-                "north_m_s": drone.telemetry.g_velocity.north_m_s,
-                "east_m_s": drone.telemetry.g_velocity.east_m_s,
-                "down_m_s": drone.telemetry.g_velocity.down_m_s,
+                "north_kn": drone.telemetry.g_velocity.north_kn,
+                "east_kn": drone.telemetry.g_velocity.east_kn,
+                "down_kn": drone.telemetry.g_velocity.down_kn,
             } if drone.telemetry.g_velocity is not None else None,
             "a_velocity": {
                 "roll_rad_s": drone.telemetry.a_velocity.roll_rad_s,
@@ -52,7 +52,7 @@ async def post_heartbeat(drone):
             "forward": drone.telemetry.forward,
             "right": drone.telemetry.right,
             "down": drone.telemetry.down,
-            # "battery": drone.telemetry.battery # Issue: battery is not JSON serializable
+            "battery": drone.telemetry.battery_remaining
         }
     })
 
