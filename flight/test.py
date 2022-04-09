@@ -23,7 +23,25 @@ async def main():
     drone.start_heartbeat()
     print("Done!")
     
-    await drone.start_mission()
+    await drone.takeoff()
+
+    point1 = MissionPoint(38.1443,
+                          -76.4250, 110)
+    point2 = MissionPoint(38.1440,
+                          -76.4260, 120)
+    point3 = MissionPoint(38.1443,
+                          -76.4260, 100)
+    point4 = MissionPoint(38.1445,
+                          -76.4300, 150)
+    plist = [point1, point2, point3, point4]
+
+    # TODO: Link-up drone telemetry to intermediary server so Garni can get the drone
+    #       GPS and telemetry data for ground station map.
+
+    await drone.traverse_waypoints(points=plist)
+
+    await drone.return_home()
+    await drone.land()
 
     await asyncio.sleep(1)
 

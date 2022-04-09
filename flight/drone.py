@@ -79,6 +79,8 @@ class FlyZone:
         self.boundaryPoints = boundaryPoints
 
 
+# TODO: Refactor to use data_to_mission
+# TODO: Add default values
 class Mission:
     def __init__(self, data):
         self.id = data['id']
@@ -89,7 +91,7 @@ class Mission:
         self.flyZones = []
         if ('flyZones' in data):
             for zone in data['flyZones']:
-                self.flyZones.append(FlyZone(zone))
+                self.flyZones.append(data_to_flyzone(zone))
 
         self.waypoints = get_list_of_points(data, 'waypoints')
         self.searchGridPoints = get_list_of_points(data, 'searchGridPoints')
@@ -196,11 +198,11 @@ class Drone:
         if data is not None:
             self.mission = Mission(data)
 
-    async def takeoff(self):
+    async def takeoff(self, takeoff_alt=100):
         '''Starts the takeoff procedure, returns when takeoff is finished'''
 
         self.ground_altitude = self.telemetry.absolute_altitude
-        await takeoff(self.system, self.telemetry)
+        await takeoff(self.system, self.telemetry, takeoff_alt)
 
     async def goto(self, latitude, longitude, relative_altitude=None, yaw=0):
         '''Goes to a specific location, return when arrived at location'''
@@ -240,3 +242,22 @@ class Drone:
         '''Start procedure to land, returns when landed'''
 
         await land(self.system, self.telemetry)
+
+    async def start_mission(self):
+        '''Starts running through the current mission
+            - Requires that telemetry has been started
+        '''
+        if (self.mission is None): return
+
+        flyzones = self.mission.flyZones
+        waypoints = self.mission.waypoints
+        
+        takeoff_alt = 100
+        if (len(flyzones) > 0): 
+            takeoff_alt = flyzones[0].altitudeMin + 10
+
+        await self.takeoff(takeoff_alt)
+        await self.traverse_waypoints(points=waypoints)
+        await self.return_home()
+        await self.land()
+
