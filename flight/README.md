@@ -45,6 +45,28 @@ To install the required libraries, run
 pip install -r requirements.txt
 ```
 
+## Configuration
+
+To configure the flight software, create/edit a file called **.env**.
+
+For testing:
+
+Fill the **.env** file with:
+```
+HOST="http://localhost:3000"
+HOME_LAT=38.144478
+HOME_LON=-76.42942
+```
+
+For actual use:
+
+Fill the **.env** file with:
+```
+HOST="<url to intermediary server>"
+HOME_LAT=<home point latitude>
+HOME_LON=<home point longitude>
+```
+
 ## Running 
 
 ```
