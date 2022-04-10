@@ -3,6 +3,9 @@
 */
 
 import express from 'express';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
 
 export default class DroneRouter {
     constructor(state) {
@@ -12,6 +15,10 @@ export default class DroneRouter {
         this.drone = state.drone;
         this.ground_station = state.ground_station;
         this.ground_vehicle = state.ground_vehicle;
+
+        this.upload = multer({
+            dest: "./images/"
+        })
 
         this.router.use((req, res, next) => {
             this.drone.last_contact = Date.now();
@@ -47,6 +54,22 @@ export default class DroneRouter {
                 }
             }
             res.status(404).send("Could not get mission data from Interops Server");
+        });
+
+        this.router.post('/upload_odm_image',  this.upload.single("image"), async (req, res) => {
+            let type = req.file.mimetype;
+            let dest = req.file.destination;
+            let filename = path.join(dest, req.file.filename);
+            let originalname = path.join(dest, req.file.originalname);
+
+            if (!["image/jpg", "image/jpeg"].includes(type)) {
+                res.status(403).send("Invalid File Format");
+                fs.unlinkSync(filename);
+                return;
+            }
+
+            fs.renameSync(filename, originalname);
+            res.status(200).send("Uploaded Successfully");
         });
     }
 

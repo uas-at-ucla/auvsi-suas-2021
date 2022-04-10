@@ -1,6 +1,5 @@
-import express from 'express';
+import express, { json } from 'express';
 import cors from 'cors';
-import { json } from 'express';
 import InteropServer from './interops.js';
 import 'dotenv/config'
 import {Drone, GroundStation, GroundVehicle} from './data.js';
