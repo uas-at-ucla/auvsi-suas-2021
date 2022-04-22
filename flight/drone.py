@@ -4,6 +4,9 @@ from telemetry import TelemetryData
 import communication as comms
 import asyncio
 from movement import *
+from pixcam import PixCam
+from utils import kn_to_ftps
+from typing import Union
 
 HEARTBEAT_RATE = 0.5
 RTH_TIMEOUT = 30
@@ -123,13 +126,15 @@ class Mission:
 # =================================================================
 
 class Drone:
-    def __init__(self):
+    def __init__(self, pic_rate: float=5):
         self.system = System()
         self.telemetry = TelemetryData()
         self.mission = None
         self.ground_altitude = 0
         self.last_contact = datetime.now(timezone.utc).timestamp()
         self.last_ground_contact = datetime.now(timezone.utc).timestamp()
+
+        self.PIC_RATE = pic_rate
 
     async def connect(self):
         '''Connects the Drone to the MAVSDK interface'''
@@ -161,9 +166,9 @@ class Drone:
         if use_air:
             asyncio.create_task(self.telemetry.air(self.system))
         if use_ground_velocity:
-            asyncio.create_task(self.telemetry.ground_velocity(self.system))
+            asyncio.create_task(self.telemetry.g_velocity(self.system))
         if use_angular_velocity:
-            asyncio.create_task(self.telemetry.angular_velocity(self.system))
+            asyncio.create_task(self.telemetry.a_velocity(self.system))
         if use_acceleration:
             asyncio.create_task(self.telemetry.acceleration(self.system))
         if use_battery_status:
@@ -198,13 +203,40 @@ class Drone:
         if data is not None:
             self.mission = Mission(data)
 
-    async def takeoff(self, takeoff_alt=100):
+    def start_picture_taking(self, working_dir: str):
+        ''' 
+        Start taking pictures for map stitching
+            Parameters:
+                working_dir: str - path to the working directory of the camera
+        '''
+        self.camera = PixCam(working_dir)
+        if (self.camera.check_camera_connection()):
+            asyncio.create_task(self._picture_taking())
+
+    async def _picture_taking(self):
+        while self.camera.check_camera_connection():
+            t_data = self.telemetry
+            
+            img_path, _ = self.camera.take_pic_and_adjust_loc(
+                lat=t_data.latitude,
+                long=t_data.longitude,
+                velocity=kn_to_ftps(t_data.ground_velocity.lateral_magnitude()),
+                heading=t_data.yaw,
+                alt=t_data.absolute_altitude
+            )
+            print("New picture saved at:", img_path)
+
+            if not await comms.upload_image(img_path):
+                print("Uploading picture to server FAILED")     
+            await asyncio.sleep(self.PIC_RATE)
+
+    async def takeoff(self, takeoff_alt: float=100):
         '''Starts the takeoff procedure, returns when takeoff is finished'''
 
         self.ground_altitude = self.telemetry.absolute_altitude
         await takeoff(self.system, self.telemetry, takeoff_alt)
 
-    async def goto(self, latitude, longitude, relative_altitude=None, yaw=0):
+    async def goto(self, latitude: float, longitude: float, relative_altitude: Union[float, None]=None, yaw=0):
         '''Goes to a specific location, return when arrived at location'''
 
         if relative_altitude is None:
@@ -218,11 +250,11 @@ class Drone:
             relative_altitude + self.ground_altitude,
             yaw)
 
-    async def traverse_waypoints(self, points):
+    async def traverse_waypoints(self, points: list[MissionPoint]):
         '''
         Travels through waypoints, returns when all points have been traversed
             Parameters:
-                points - list of MissionPoints
+                points: - list of MissionPoints
         '''
 
         for point in points:
@@ -245,7 +277,7 @@ class Drone:
 
     async def start_mission(self):
         '''Starts running through the current mission
-            - Requires that telemetry has been started
+            - Requires that telemetry has been started and a mission be ready
         '''
         if (self.mission is None): return
 

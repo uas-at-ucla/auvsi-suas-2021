@@ -71,3 +71,15 @@ async def get_mission(drone):
     except Exception as e:
         print(e)
         return None
+
+async def post_image(image_path):
+    try:
+        with open(image_path, 'rb') as img_file:
+            result = requests.post(f"{HOST}/drone/upload_odm_image", files={'upload_file': img_file})
+        if (result.ok):
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False

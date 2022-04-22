@@ -25,6 +25,10 @@ def ft_to_m(num):
     return num / 3.281
 
 
+def kn_to_ftps(num):
+    return num * 1.68781
+
+
 def compare_coords(
         coords1: Tuple[Union[float, None], Union[float, None]],
         coords2: Tuple[Union[float, None], Union[float, None]],

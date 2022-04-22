@@ -3,6 +3,7 @@
 """
 Module for telemetry update coroutines.
 """
+import math
 from mavsdk import System
 from utils import mps_to_kn, m_to_ft
 
@@ -12,6 +13,9 @@ class VelocityNedKnots:
         self.north_kn = north_kn
         self.east_kn = east_kn
         self.down_kn = down_kn
+    
+    def lateral_magnitude(self):
+        return math.sqrt(self.north_kn * self.north_kn + self.east_kn * self.east_kn)
 
 
 class TelemetryData:
@@ -63,7 +67,7 @@ class TelemetryData:
         async for is_in_air in drone.telemetry.in_air():
             self.is_in_air = is_in_air
 
-    async def ground_velocity(self, drone: System):
+    async def g_velocity(self, drone: System):
         async for g_velocity in drone.telemetry.velocity_ned():
             self.ground_velocity = VelocityNedKnots(
                 mps_to_kn(g_velocity.north_m_s),
@@ -71,7 +75,7 @@ class TelemetryData:
                 mps_to_kn(g_velocity.down_m_s),
             )
 
-    async def angular_velocity(self, drone: System):
+    async def a_velocity(self, drone: System):
         async for a_velocity in drone.telemetry.attitude_angular_velocity_body():
             self.angular_velocity = a_velocity
 
