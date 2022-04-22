@@ -62,8 +62,12 @@ async def post_heartbeat(drone):
 
 
 async def get_mission(drone):
-    result = requests.get(f"{HOST}/drone/mission")
-    if (result.ok):
-        return result.json()
-    else:
+    try:
+        result = requests.get(f"{HOST}/drone/mission")
+        if (result.ok):
+            return result.json()
+        else:
+            return None
+    except Exception as e:
+        print(e)
         return None
