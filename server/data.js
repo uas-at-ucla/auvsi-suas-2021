@@ -108,6 +108,7 @@ class GroundVehicle {
             longitude: this.position.longitude,
             altitude: this.position.absolute_altitude,
             isGrounded: this.grounded
+            // Delivered Payload?
         }
     }
 }
