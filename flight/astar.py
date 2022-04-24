@@ -1,5 +1,5 @@
 import math
-
+import matplotlib.pyplot as plt
 
 
 class AStar:
@@ -50,7 +50,7 @@ class AStar:
                 key=lambda o: open_set[o].cost + self.calc_heuristic(goal_node,
                                                                      open_set[
                                                                          o]))
-            cudrent = open_set[c_id]
+            current = open_set[c_id]
 
             if current.x == goal_node.x and current.y == goal_node.y:
                 print("Find goal")
@@ -222,3 +222,14 @@ def main():
 
     a_star = AStar(ox, oy, grid_size, drone_radius)
     rx, ry = a_star.planning(sx, sy, gx, gy)
+
+    # Plots the map with obstacles + calculated path.
+    plt.plot(ox, oy, ".k")
+    plt.plot(sx, sy, "og")
+    plt.plot(gx, gy, "xb")
+    plt.scatter(rx, ry)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
