@@ -18,7 +18,7 @@ async def termination_checks(ugv): # Run concurrently with main
     time_last_connected = time.time()
     time_elapsed_since_disconnect = time.time() - time_last_connected
     
-    async for state in ugv.core.connectoin_state():
+    async for state in ugv.core.connection_state():
         if state.is_connected:
             time_last_connected = time.time()
             time_elapsed_since_disconnect = 0
@@ -58,9 +58,9 @@ async def run_ugv_mission(target_location):
                 detach_from_uas()
                 await ugv.action.arm()
                 await ugv.action.takeoff()
+                await asyncio.sleep(10) # Don't drive while tumbling through air
                 state = 1
         elif state == 1:
-            await asyncio.sleep(10) # Don't drive while tumbling through air
             await ugv.action.goto_location(*target_location)
             state = 2
         elif state == 2:
