@@ -1,13 +1,16 @@
+from typing import List
 from mavsdk import System
 from telemetry import TelemetryData
-from utils import compare_altitude, compare_position, mps_to_kn, m_to_ft, ft_to_m, kn_to_mps
+from utils import compare_altitude, compare_position, ft_to_m, draw_circle
 import asyncio
 from decouple import config
+from drone import Obstacle
 
 UPDATE_TIME = 1
-# TODO: Use config file or something for HOME coords
 HOME_LAT = float(config("HOME_LAT"))
 HOME_LON = float(config("HOME_LON"))
+
+OBSTACLE_BUFFER_SPACE = 4
 
 
 async def takeoff(
@@ -103,3 +106,32 @@ async def return_to_home(drone: System, data: TelemetryData):
     """
     print("Returning Home")
     await goto_location(drone, data, HOME_LAT, HOME_LON, data.absolute_altitude, 0)
+
+
+class DronePathfinder:
+    def __init__(self, mission):
+        self.set_mission(mission)
+    
+    def set_mission(self, mission):
+        if mission.stationaryObstacles is not None:
+            self.obstacles = mission.stationaryObstacles
+            self.ox = []
+            self.oy = []
+            self._create_obstacles_points()
+    
+    def _create_obstacles_points(self):
+        ox: List[int] = [] # Obstacle points x
+        oy: List[int] = [] # Obstacle points y 
+        
+        obstacle: Obstacle
+        for obstacle in self.obstacles:
+            # TODO: figure out lon/lat conversion to int grid
+            cx = obstacle.longitude
+            cy = obstacle.latitude
+            r = obstacle.radius + OBSTACLE_BUFFER_SPACE
+            x_list, y_list = draw_circle(cx, cy, r)
+            ox.extend(x_list)
+            oy.extend(y_list)
+            
+        self.ox = ox
+        self.oy = oy

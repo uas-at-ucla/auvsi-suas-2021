@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 show_animation = True
 
-
 class AStar:
     #given list of no go x coordinates, y coordinates, grid resolution, and drone radius, all in meters
     #creates grid map
@@ -53,7 +52,7 @@ class AStar:
                 key=lambda o: open_set[o].cost + self.calc_heuristic(goal_node,
                                                                      open_set[
                                                                          o]))
-            cudrent = open_set[c_id]
+            current = open_set[c_id]
 
             # show graph
             if show_animation:  # pragma: no cover

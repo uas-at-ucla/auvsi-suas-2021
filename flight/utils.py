@@ -91,3 +91,31 @@ def compare_position(
 
     return compare_coords((pos1[0], pos1[1]), (pos2[0], pos2[1]), coord_epsilon) and \
         compare_altitude(pos1[2], pos2[2], altitude_epsilon)
+
+
+def draw_circle(cx: int, cy: int, r: int):
+    """Convert circle coords into a list of x and y values in that circle
+
+    Args:
+        cx (int): center x value
+        cy (int): center y value
+        r (int): radius of the circle
+
+    Returns:
+        Tuple[List[int], List[int]]: tuple of x and y (respectively) values
+        that are within the circle
+    """
+    x_list = [] # list of x's in the circle
+    y_list = [] # list of y's in the circle
+    
+    r2 = r*r # radius_squared
+    for x in range(-r, r + 1):
+        for y in range(-r, r + 1):
+            distance = x*x + y*y    # distance to the center
+            if (distance > r2):
+                continue
+
+            x_list.append(cx + x)
+            y_list.append(cy + y)
+    
+    return x_list, y_list
