@@ -90,8 +90,30 @@ class GroundStation {
 
 class GroundVehicle {
     last_contact;
+    current_mission;
+    
+    // UGV Telemetry
     position = new Position(undefined, undefined, undefined);
-    grounded = false;
+    
+    /**
+     * UGV States (represented by string)
+     * "STANDBY" = UGV does nothing (i.e. hanging there)
+     * "LOWERING" = Drone is lowering the UGV
+     * "DETACHED" = Drone is detached from UGV
+     * "DRIVING" = UGV is driving
+     * "COMPLETE" = UGV accomplished it's mission
+     */
+    state = "STANDBY";
+
+    set_state(data) {
+        this.state = data.state;
+    }
+
+    get_state() {
+        return {
+            state: this.state
+        }
+    }
 
     set_telemetry(data) {
         this.position = new Position(
@@ -99,15 +121,13 @@ class GroundVehicle {
             data.longitude,
             data.altitude
         );
-        this.grounded = data.isGrounded;
     }
 
     get_telemetry() {
         return {
             latitude: this.position.latitude,
             longitude: this.position.longitude,
-            altitude: this.position.absolute_altitude,
-            isGrounded: this.grounded
+            altitude: this.position.absolute_altitude
         }
     }
 }
