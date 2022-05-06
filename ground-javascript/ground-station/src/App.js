@@ -1,11 +1,13 @@
 import logo from './logo.svg';
 import './App.css';
-import EntireWindow from './EntireWindow';
+import HotBar from './components/HotBar';
+import MapSide from './components/MapSide'
 
 function App() {
   return (
     <div className="App">
-      <EntireWindow/>
+        <HotBar />
+        <MapSide />
     </div>
   );
 }

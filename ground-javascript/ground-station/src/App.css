@@ -1,5 +1,20 @@
 .App {
-  text-align: center;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+#s1 {
+    background-color: orange;
+    flex: 1;
+    height: 100%;
+}
+
+#s2 {
+    background-color: green;
+    flex: 1;
+    height: 100%;
 }
 
 .App-logo {
