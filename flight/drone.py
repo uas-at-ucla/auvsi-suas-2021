@@ -4,6 +4,8 @@ from telemetry import TelemetryData
 import communication as comms
 import asyncio
 from movement import *
+from decouple import config
+
 
 HEARTBEAT_RATE = 0.5
 RTH_TIMEOUT = 30
@@ -133,8 +135,12 @@ class Drone:
 
     async def connect(self):
         '''Connects the Drone to the MAVSDK interface'''
-
-        await self.system.connect()
+        port = config("MAVlink", default=None)
+        if port is not None:
+            print(f"Using connection port: {port}")
+            await self.system.connect(port)
+        else:
+            await self.system.connect()
         print("Waiting for drone to connect...")
         async for state in self.system.core.connection_state():
             if state.is_connected:

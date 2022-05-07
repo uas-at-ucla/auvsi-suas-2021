@@ -5,6 +5,7 @@ from mavsdk.telemetry import LandedState
 
 async def main():
     drone = Drone()
+    print("Connecting to drone...")
     await drone.connect()
 
     print("Starting telemetry")
