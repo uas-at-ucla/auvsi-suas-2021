@@ -2,7 +2,7 @@ import math
 
 import matplotlib.pyplot as plt
 
-show_animation = True
+show_animation = False
 
 class AStar:
     #given list of no go x coordinates, y coordinates, grid resolution, and drone radius, all in meters
@@ -41,6 +41,7 @@ class AStar:
 
         open_set, closed_set = dict(), dict()
         open_set[self.calc_grid_index(start_node)] = start_node
+        print(self.min_x, self.max_x, self.min_y, self.max_y)
 
         while 1:
             if len(open_set) == 0:

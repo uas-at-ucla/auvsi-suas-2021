@@ -93,7 +93,7 @@ def compare_position(
         compare_altitude(pos1[2], pos2[2], altitude_epsilon)
 
 
-def draw_circle(cx: int, cy: int, r: int):
+def draw_circle(cx: int, cy: int, r: int, resolution: float = 1):
     """Convert circle coords into a list of x and y values in that circle
 
     Args:
@@ -109,13 +109,56 @@ def draw_circle(cx: int, cy: int, r: int):
     y_list = [] # list of y's in the circle
     
     r2 = r*r # radius_squared
-    for x in range(-r, r + 1):
-        for y in range(-r, r + 1):
+    for x in range(-r, r + resolution, resolution):
+        for y in range(-r, r + resolution, resolution):
             distance = x*x + y*y    # distance to the center
-            if (distance > r2):
+            if (distance >= r2):
                 continue
 
             x_list.append(cx + x)
             y_list.append(cy + y)
     
     return x_list, y_list
+
+
+def draw_border(min_x, min_y, max_x, max_y, resolution=1):
+    if (min_x > max_x):
+        return draw_border(max_x, min_y, min_x, max_y, resolution)
+    if (min_y > max_y):
+        return draw_border(min_x, max_y, max_x, min_y, resolution)
+    
+    x_list = []
+    y_list = []
+    
+    for x in range(min_x, max_x + resolution, resolution):
+        x_list.append(x)
+        y_list.append(min_y)
+        
+        x_list.append(x)
+        y_list.append(max_y)
+        
+    for y in range(min_y, max_y + resolution, resolution):
+        x_list.append(min_x)
+        y_list.append(y)
+        
+        x_list.append(max_x)
+        y_list.append(y)
+    
+    return x_list, y_list
+
+def draw_line(min_x, min_y, max_x, max_y, resolution=1):
+    if (min_x > max_x):
+        return draw_border(max_x, min_y, min_x, max_y, resolution)
+    if (min_y > max_y):
+        return draw_border(min_x, max_y, max_x, min_y, resolution)
+    
+    x_list = []
+    y_list = []
+    
+    dx = max_x - min_x
+    dy = max_y - min_y
+    
+    for x in range(min_x, max_x + resolution, resolution):
+        y = min_y + dy * (x - min_x) / dx
+        x_list.append(x)
+        y_list.append(y)        
