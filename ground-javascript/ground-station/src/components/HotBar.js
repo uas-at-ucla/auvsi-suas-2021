@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BarMetric from './BarMetric.js'
 import "../styles/HotBar.css"
 
 function HotBar() {
@@ -14,37 +15,16 @@ function HotBar() {
         <div className="hot-bar-container">
             <div className = "vehicle-section">
                 <div className="hot-bar-header">Drone Telemetry</div>
-                <div className="metric">
-                    <span className="metricName">Latitude</span> 
-                    <span className="metricValue">{latitude}°</span>
-                </div>
-                <div className="metric">
-                    <span className="metricName">Longitude</span> 
-                    <span className="metricValue">{longitude}°</span>
-                </div>
-                <div className="metric">
-                    <span className="metricName">Airspeed</span>
-                    <span className="metricValue">{airSpeed} knots</span>
-                </div>
-                <div className="metric">
-                    <span className="metricName">Ground Speed</span>
-                    <span className="metricValue">{airSpeed + windSpeed} knots</span>
-                </div>
-                <div className="metric">
-                    <span className="metricName">Altitude</span>
-                    <span className="metricValue">{altitude}m</span>
-                </div>
+                <BarMetric name="Latitude" valString={`${latitude}°`}/>
+                <BarMetric name="Longitude" valString={`${longitude}°`}/>
+                <BarMetric name="Airspeed" valString={`${airSpeed} knots`}/>
+                <BarMetric name="Ground Speed" valString={`${airSpeed + windSpeed} knots`}/>
+                <BarMetric name="Altitude" valString={`${altitude}m`}/>
             </div>
             <div className="vehicle-section">
                 <div className="hot-bar-header">UGV Telemetry</div>
-                <div className="metric">
-                    <span className="metricName">Direction</span>
-                    <span className="metricValue">{ugvDir} °N</span>
-                </div>
-                <div className="metric">
-                    <span className="metricName">Speed</span>
-                    <span className="metricValue">{ugvSpeed} m/s</span>
-                </div>
+                <BarMetric name="Direction" valString={`${ugvDir} °N`}/>
+                <BarMetric name="Speed" valString={`${ugvSpeed} m/s`}/>
             </div>
         </div>
     )
