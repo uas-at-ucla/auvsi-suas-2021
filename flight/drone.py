@@ -148,16 +148,15 @@ class Drone:
 
     async def connect(self):
         '''Connects the Drone to the MAVSDK interface'''
+        print("Waiting for drone to connect...")
         if MAVLINK_PORT is not None:
             print(f"Using connection port: {MAVLINK_PORT}")
             await self.system.connect(system_address=MAVLINK_PORT)
         else:
             await self.system.connect()
-        print("Waiting for drone to connect...")
         async for state in self.system.core.connection_state():
             if state.is_connected:
-                break
-        
+                break        
         print("Drone Connected Successfully!")
 
         if USE_INTERMEDIARY:
