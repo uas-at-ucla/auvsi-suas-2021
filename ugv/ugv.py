@@ -1,5 +1,6 @@
 import asyncio, time
 from mavsdk import System
+from mavsdk import telemetry
 
 END_STATE = 2
 DETACH_THRESH = 1 # TODO
@@ -38,7 +39,7 @@ async def termination_checks(ugv): # Run concurrently with main
         
         # TODO: Also terminate if out of bounds
 
-async def run_ugv_mission(target_location):
+async def run_ugv_mission(target_location, drop_location, drop_bounds):
     ugv = System()
     await ugv.connect()
     
@@ -48,13 +49,20 @@ async def run_ugv_mission(target_location):
             print("Connected to ugv.")
             break
     
+
     state = 0
     
     await asyncio.sleep(1)#420) # Sleep until takeoff guaranteed complete
     
+    #get current_location
+
+  
     while state != END_STATE:
+        current_location = get_current_location(ugv)
         if state == 0:
-            if (dist_to_ground() < DETACH_THRESH):
+            if (dist_to_ground() < DETACH_THRESH and 
+            (abs(current_location[0] - drop_location[0] < drop_bounds) and 
+            abs(current_location[1] - drop_location[1] < drop_bounds))):
                 detach_from_uas()
                 await ugv.action.arm()
                 await ugv.action.takeoff()
@@ -66,6 +74,12 @@ async def run_ugv_mission(target_location):
         elif state == 2:
             report_mission_success()
 
+async def get_current_location(ugv):
+    async for current_location in ugv.telemetry.position():
+        data = [current_location.latitude_deg, current_location.logitude_deg, 0, 0]
+        return data
+
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_ugv_mission([10, 20, 30, 40]))
+    loop.run_until_complete(run_ugv_mission([10, 20, 30, 40], [0, 0, 30, 0], .05))
