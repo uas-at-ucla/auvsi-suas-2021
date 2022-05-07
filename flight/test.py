@@ -16,6 +16,10 @@ async def main():
     print("Done!")
     
     print(f"Current telemetry: {drone.telemetry.__dict__}")
+
+    print("Starting heartbeat... ", end="")
+    drone.start_heartbeat()
+    print("Done!")
     
     while drone.telemetry.latitude is None or \
         drone.telemetry.longitude is None:
@@ -26,10 +30,6 @@ async def main():
     if drone.telemetry.is_in_air:
         await drone.return_home()
         await drone.land()
-
-    print("Starting heartbeat.. ", end="")
-    drone.start_heartbeat()
-    print("Done!")
     
     await drone.takeoff()
 

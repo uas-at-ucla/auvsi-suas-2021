@@ -5,7 +5,7 @@ from datetime import datetime
 import requests
 from decouple import config
 
-HOST = config("HOST")
+HOST = config("HOST", default="local")
 
 heartbeat_established = False
 last_heartbeat = datetime.now()
