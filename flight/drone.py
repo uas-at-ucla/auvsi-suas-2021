@@ -178,7 +178,7 @@ class Drone:
     def start_heartbeat(self):
         '''Starts the heartbeat with the intermediary server'''
 
-        if (comms.test_connection()):
+        if (comms.test_connection()): #TODO: change to config disable/enable
             asyncio.create_task(self._heartbeat())
 
     async def _heartbeat(self):

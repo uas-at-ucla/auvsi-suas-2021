@@ -9,7 +9,7 @@ UPDATE_TIME = 1
 HOME_LAT = float(config("HOME_LAT"))
 HOME_LON = float(config("HOME_LON"))
 
-
+# TODO: Add try/except for drone.action stuff
 async def takeoff(
         drone: System,
         telemetry_data: TelemetryData,
