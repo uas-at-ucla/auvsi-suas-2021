@@ -13,7 +13,6 @@ async def main():
     print("Waiting for telemetry... ", end="")
     while drone.telemetry.is_landed is None:
         await asyncio.sleep(1)
-
     print("Done!")
     
     print(f"Current telemetry: {drone.telemetry.__dict__}")
