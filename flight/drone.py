@@ -11,6 +11,9 @@ MAVLINK_PORT = config("MAVLINK", default=None)
 USE_INTERMEDIARY = config("USE_INTERMEDIARY", default=False, cast=bool)
 HOME_LAT = float(config("HOME_LAT", default="0"))
 HOME_LON = float(config("HOME_LON", default="0"))
+# from pixcam import PixCam
+from utils import kn_to_ftps
+from typing import Union
 
 HEARTBEAT_RATE = 0.5
 RTH_TIMEOUT = 30
@@ -130,7 +133,7 @@ class Mission:
 # =================================================================
 
 class Drone:
-    def __init__(self):
+    def __init__(self, pic_rate: float=5):
         self.system = System()
         self.telemetry = TelemetryData()
         self.mission = None
@@ -140,6 +143,8 @@ class Drone:
         
         self.home_lat = HOME_LAT
         self.home_lon = HOME_LON
+
+        self.PIC_RATE = pic_rate
 
     async def connect(self):
         '''Connects the Drone to the MAVSDK interface'''
@@ -225,13 +230,40 @@ class Drone:
                 print("Set home coords to: ", self.home_lat, self.home_lon)
         
 
-    async def takeoff(self, takeoff_alt=100):
+    def start_picture_taking(self, working_dir: str):
+        ''' 
+        Start taking pictures for map stitching
+            Parameters:
+                working_dir: str - path to the working directory of the camera
+        '''
+        self.camera = PixCam(working_dir)
+        if (self.camera.check_camera_connection()):
+            asyncio.create_task(self._picture_taking())
+
+    async def _picture_taking(self):
+        while self.camera.check_camera_connection():
+            t_data = self.telemetry
+            
+            img_path, _ = self.camera.take_pic_and_adjust_loc(
+                lat=t_data.latitude,
+                long=t_data.longitude,
+                velocity=kn_to_ftps(t_data.ground_velocity.lateral_magnitude()),
+                heading=t_data.yaw,
+                alt=t_data.absolute_altitude
+            )
+            print("New picture saved at:", img_path)
+
+            if not await comms.upload_image(img_path):
+                print("Uploading picture to server FAILED")     
+            await asyncio.sleep(self.PIC_RATE)
+
+    async def takeoff(self, takeoff_alt: float=100):
         '''Starts the takeoff procedure, returns when takeoff is finished'''
 
         self.ground_altitude = self.telemetry.absolute_altitude
         await takeoff(self.system, self.telemetry, takeoff_alt)
 
-    async def goto(self, latitude, longitude, relative_altitude=None, yaw=0):
+    async def goto(self, latitude: float, longitude: float, relative_altitude: Union[float, None]=None, yaw=0):
         '''Goes to a specific location, return when arrived at location'''
 
         if relative_altitude is None:
@@ -245,11 +277,11 @@ class Drone:
             relative_altitude + self.ground_altitude,
             yaw)
 
-    async def traverse_waypoints(self, points):
+    async def traverse_waypoints(self, points: list[MissionPoint]):
         '''
         Travels through waypoints, returns when all points have been traversed
             Parameters:
-                points - list of MissionPoints
+                points: - list of MissionPoints
         '''
 
         for point in points:
@@ -273,7 +305,7 @@ class Drone:
 
     async def start_mission(self):
         '''Starts running through the current mission
-            - Requires that telemetry has been started
+            - Requires that telemetry has been started and a mission be ready
         '''
         if (self.mission is None): return
 

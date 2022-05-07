@@ -1,6 +1,7 @@
 import math
 import matplotlib.pyplot as plt
 
+show_animation = False
 
 class AStar:
     #given list of no go x coordinates, y coordinates, grid resolution, and drone radius, all in meters
@@ -39,6 +40,7 @@ class AStar:
 
         open_set, closed_set = dict(), dict()
         open_set[self.calc_grid_index(start_node)] = start_node
+        print(self.min_x, self.max_x, self.min_y, self.max_y)
 
         while 1:
             if len(open_set) == 0:
@@ -51,6 +53,17 @@ class AStar:
                                                                      open_set[
                                                                          o]))
             current = open_set[c_id]
+
+            # show graph
+            if show_animation:  # pragma: no cover
+                plt.plot(self.calc_grid_position(current.x, self.min_x),
+                         self.calc_grid_position(current.y, self.min_y), "xc")
+                # for stopping simulation with the esc key.
+                plt.gcf().canvas.mpl_connect('key_release_event',
+                                             lambda event: [exit(
+                                                 0) if event.key == 'escape' else None])
+                if len(closed_set.keys()) % 10 == 0:
+                    plt.pause(0.001)
 
             if current.x == goal_node.x and current.y == goal_node.y:
                 print("Find goal")

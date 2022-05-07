@@ -3,6 +3,7 @@
 """
 Module for telemetry update coroutines.
 """
+import math
 from mavsdk import System
 from utils import mps_to_kn, m_to_ft
 
@@ -12,6 +13,9 @@ class VelocityNedKnots:
         self.north_kn = north_kn
         self.east_kn = east_kn
         self.down_kn = down_kn
+    
+    def lateral_magnitude(self):
+        return math.sqrt(self.north_kn * self.north_kn + self.east_kn * self.east_kn)
 
 
 class TelemetryData:

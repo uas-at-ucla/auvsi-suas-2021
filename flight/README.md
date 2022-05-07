@@ -73,6 +73,11 @@ HOME_LON=<home point longitude>
 python3 main.py
 ```
 
+Run tests
+```
+python3 test.py
+```
+
 Run examples
 ```
 python3 examples/takeoff_and_land.py

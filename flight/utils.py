@@ -25,6 +25,10 @@ def ft_to_m(num):
     return num / 3.281
 
 
+def kn_to_ftps(num):
+    return num * 1.68781
+
+
 def compare_coords(
         coords1: Tuple[Union[float, None], Union[float, None]],
         coords2: Tuple[Union[float, None], Union[float, None]],
@@ -87,3 +91,74 @@ def compare_position(
 
     return compare_coords((pos1[0], pos1[1]), (pos2[0], pos2[1]), coord_epsilon) and \
         compare_altitude(pos1[2], pos2[2], altitude_epsilon)
+
+
+def draw_circle(cx: int, cy: int, r: int, resolution: float = 1):
+    """Convert circle coords into a list of x and y values in that circle
+
+    Args:
+        cx (int): center x value
+        cy (int): center y value
+        r (int): radius of the circle
+
+    Returns:
+        Tuple[List[int], List[int]]: tuple of x and y (respectively) values
+        that are within the circle
+    """
+    x_list = [] # list of x's in the circle
+    y_list = [] # list of y's in the circle
+    
+    r2 = r*r # radius_squared
+    for x in range(-r, r + resolution, resolution):
+        for y in range(-r, r + resolution, resolution):
+            distance = x*x + y*y    # distance to the center
+            if (distance >= r2):
+                continue
+
+            x_list.append(cx + x)
+            y_list.append(cy + y)
+    
+    return x_list, y_list
+
+
+def draw_border(min_x, min_y, max_x, max_y, resolution=1):
+    if (min_x > max_x):
+        return draw_border(max_x, min_y, min_x, max_y, resolution)
+    if (min_y > max_y):
+        return draw_border(min_x, max_y, max_x, min_y, resolution)
+    
+    x_list = []
+    y_list = []
+    
+    for x in range(min_x, max_x + resolution, resolution):
+        x_list.append(x)
+        y_list.append(min_y)
+        
+        x_list.append(x)
+        y_list.append(max_y)
+        
+    for y in range(min_y, max_y + resolution, resolution):
+        x_list.append(min_x)
+        y_list.append(y)
+        
+        x_list.append(max_x)
+        y_list.append(y)
+    
+    return x_list, y_list
+
+def draw_line(min_x, min_y, max_x, max_y, resolution=1):
+    if (min_x > max_x):
+        return draw_border(max_x, min_y, min_x, max_y, resolution)
+    if (min_y > max_y):
+        return draw_border(min_x, max_y, max_x, min_y, resolution)
+    
+    x_list = []
+    y_list = []
+    
+    dx = max_x - min_x
+    dy = max_y - min_y
+    
+    for x in range(min_x, max_x + resolution, resolution):
+        y = min_y + dy * (x - min_x) / dx
+        x_list.append(x)
+        y_list.append(y)        
