@@ -1,3 +1,4 @@
+from ctypes import cast
 from datetime import datetime, timezone
 from mavsdk import System
 from telemetry import TelemetryData
@@ -6,6 +7,10 @@ import asyncio
 from movement import *
 from decouple import config
 
+MAVLINK_PORT = config("MAVLINK", default=None)
+USE_INTERMEDIARY = config("USE_INTERMEDIARY", default=False, cast=bool)
+HOME_LAT = float(config("HOME_LAT", default="0"))
+HOME_LON = float(config("HOME_LON", default="0"))
 
 HEARTBEAT_RATE = 0.5
 RTH_TIMEOUT = 30
@@ -132,20 +137,30 @@ class Drone:
         self.ground_altitude = 0
         self.last_contact = datetime.now(timezone.utc).timestamp()
         self.last_ground_contact = datetime.now(timezone.utc).timestamp()
+        
+        self.home_lat = HOME_LAT
+        self.home_lon = HOME_LON
 
     async def connect(self):
         '''Connects the Drone to the MAVSDK interface'''
-        port = config("MAVlink", default=None)
-        if port is not None:
-            print(f"Using connection port: {port}")
-            await self.system.connect(system_address=port)
+        if MAVLINK_PORT is not None:
+            print(f"Using connection port: {MAVLINK_PORT}")
+            await self.system.connect(system_address=MAVLINK_PORT)
         else:
             await self.system.connect()
         print("Waiting for drone to connect...")
         async for state in self.system.core.connection_state():
             if state.is_connected:
                 break
+        
         print("Drone Connected Successfully!")
+
+        if USE_INTERMEDIARY:
+            print("Awaiting connection to intermediary server...")
+            while not comms.test_connection():
+                await asyncio.sleep(1)
+            print("Connected to server!")
+
 
     def start_telemetry(self,
         use_position=True,
@@ -167,9 +182,9 @@ class Drone:
         if use_air:
             asyncio.create_task(self.telemetry.air(self.system))
         if use_ground_velocity:
-            asyncio.create_task(self.telemetry.ground_velocity(self.system))
+            asyncio.create_task(self.telemetry.g_velocity(self.system))
         if use_angular_velocity:
-            asyncio.create_task(self.telemetry.angular_velocity(self.system))
+            asyncio.create_task(self.telemetry.a_velocity(self.system))
         if use_acceleration:
             asyncio.create_task(self.telemetry.acceleration(self.system))
         if use_battery_status:
@@ -178,7 +193,7 @@ class Drone:
     def start_heartbeat(self):
         '''Starts the heartbeat with the intermediary server'''
 
-        if (comms.test_connection()):
+        if (USE_INTERMEDIARY or comms.test_connection()):
             asyncio.create_task(self._heartbeat())
 
     async def _heartbeat(self):
@@ -193,7 +208,8 @@ class Drone:
                 # TODO: check if last_ground_contact is acceptable, otherwise return home
 
                 mission_id = get_data(data, "currentMissionId")
-                if (mission_id is not None and (self.mission is None or self.mission.id != mission_id)):
+                # print("HEARTBEAT!", data)
+                if (mission_id is None or self.mission is None or self.mission.id != mission_id):
                     await self._get_mission()
             await asyncio.sleep(HEARTBEAT_RATE)
 
@@ -203,6 +219,11 @@ class Drone:
         data = await comms.get_mission(self)
         if data is not None:
             self.mission = Mission(data)
+            if self.mission.mapCenterPos is not None:
+                self.home_lat = self.mission.mapCenterPos.latitude
+                self.home_lon = self.mission.mapCenterPos.longitude
+                print("Set home coords to: ", self.home_lat, self.home_lon)
+        
 
     async def takeoff(self, takeoff_alt=100):
         '''Starts the takeoff procedure, returns when takeoff is finished'''
@@ -242,7 +263,8 @@ class Drone:
     async def return_home(self):
         '''Start procedure to return home, returns when arrived'''
 
-        await return_to_home(self.system, self.telemetry)
+        # await return_to_home(self.system, self.telemetry)
+        await self.goto(self.home_lat, self.home_lon, self.telemetry.relative_altitude)
 
     async def land(self):
         '''Start procedure to land, returns when landed'''

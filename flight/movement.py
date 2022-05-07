@@ -5,9 +5,7 @@ import asyncio
 from decouple import config
 
 UPDATE_TIME = 1
-# TODO: Use config file or something for HOME coords
-HOME_LAT = float(config("HOME_LAT"))
-HOME_LON = float(config("HOME_LON"))
+
 
 
 async def takeoff(
