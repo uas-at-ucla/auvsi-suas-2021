@@ -138,7 +138,7 @@ class Drone:
         port = config("MAVlink", default=None)
         if port is not None:
             print(f"Using connection port: {port}")
-            await self.system.connect(port)
+            await self.system.connect(system_address=port)
         else:
             await self.system.connect()
         print("Waiting for drone to connect...")
