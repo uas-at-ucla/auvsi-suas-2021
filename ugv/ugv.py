@@ -56,9 +56,14 @@ async def run_ugv_mission(target_location, drop_location, drop_bounds):
     
     #get current_location
 
-  
+    current_location = [0, 0, 0, 0]
+    previous_location = [0, 0, 0, 0]
     while state != END_STATE:
-        current_location = get_current_location(ugv)
+        previous_location = current_location
+        current_location = await get_current_location(ugv)
+        if current_location == [0, 0, 0, 0]:
+            current_location = previous_location
+        
         if state == 0:
             if (dist_to_ground() < DETACH_THRESH and 
             (abs(current_location[0] - drop_location[0] < drop_bounds) and 
@@ -76,9 +81,11 @@ async def run_ugv_mission(target_location, drop_location, drop_bounds):
 
 async def get_current_location(ugv):
     async for current_location in ugv.telemetry.position():
-        data = [current_location.latitude_deg, current_location.logitude_deg, 0, 0]
-        return data
-
+        try:
+            data = [current_location.latitude_deg, current_location.longitude_deg, 0, 0]
+            return data
+        except:
+            return [0, 0, 0, 0]
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
