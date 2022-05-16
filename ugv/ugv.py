@@ -19,6 +19,29 @@ def detach_from_uas():
 def report_mission_sucess():
     pass # TODO
 
+def post(path, data):
+    try:
+        result = requests.post(path, json=data)
+
+        if (result.ok):
+            return result.json()
+        else:
+            return None
+    except Exception as e:
+        print(e)
+        return None
+def get(path, data):
+    try:
+        result = requests.get(path)
+
+        if (result.ok):
+            return result.json()
+        else:
+            return None
+    except Exception as e:
+        print(e)
+        return None
+
 async def termination_checks(ugv): # Run concurrently with main
     time_last_connected = time.time()
     time_elapsed_since_disconnect = time.time() - time_last_connected
