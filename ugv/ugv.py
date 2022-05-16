@@ -5,6 +5,8 @@ from mavsdk import telemetry
 END_STATE = 2
 DETACH_THRESH = 1 # TODO
 
+saved_location = [0, 0, 0, 0]
+
 def dist_to_ground():
     return 0.5 # TEMP
     pass # TODO
@@ -49,20 +51,12 @@ async def run_ugv_mission(target_location, drop_location, drop_bounds):
             print("Connected to ugv.")
             break
     
-
     state = 0
     
     await asyncio.sleep(1)#420) # Sleep until takeoff guaranteed complete
     
-    #get current_location
-
-    current_location = [0, 0, 0, 0]
-    previous_location = [0, 0, 0, 0]
     while state != END_STATE:
-        previous_location = current_location
         current_location = await get_current_location(ugv)
-        if current_location == [0, 0, 0, 0]:
-            current_location = previous_location
         
         if state == 0:
             if (dist_to_ground() < DETACH_THRESH and 
@@ -80,12 +74,16 @@ async def run_ugv_mission(target_location, drop_location, drop_bounds):
             report_mission_success()
 
 async def get_current_location(ugv):
-    async for current_location in ugv.telemetry.position():
-        try:
+    global saved_location
+    data = []
+    try:
+        async for current_location in ugv.telemetry.position():
             data = [current_location.latitude_deg, current_location.longitude_deg, 0, 0]
-            return data
-        except:
-            return [0, 0, 0, 0]
+            break;
+    except:
+        data = saved_location
+    saved_location = data
+    return data
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
