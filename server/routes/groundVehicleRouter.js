@@ -18,6 +18,8 @@ export default class GroundStationRouter {
             next();
         });
 
+        this.router.get('/ping', async (req, res) => await this.get_ping(req,res));
+
         this.router.get('/state', async (req, res) => await this.get_state(req, res));
 
         this.router.post('/state', async (req, res) => await this.post_state(req, res));
@@ -29,6 +31,9 @@ export default class GroundStationRouter {
         this.router.get('/mission', async (req, res) => await this.get_mission(req, res));
     }
 
+    async get_ping(req, res){
+        res.status(200).send("PONG");
+    }
     async post_state(req, res) {
         let data = req.body;
         this.ground_vehicle.set_state(data);

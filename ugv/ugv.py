@@ -1,6 +1,10 @@
 import asyncio, time
+from xmlrpc.client import SERVER_ERROR
 from mavsdk import System
 from mavsdk import telemetry
+import requests
+
+SERVER_ROUTE = 'localhost:3000/ugv'
 
 END_STATE = 2
 DETACH_THRESH = 1 # TODO
@@ -51,28 +55,28 @@ async def run_ugv_mission(target_location, drop_location, drop_bounds):
             print("Connected to ugv.")
             break
     
-    state = 0
+    requests.post(SERVER_ROUTE+'/state', json= {"state": "STANDBY"})
+    state = requests.get(SERVER_ROUTE+'/state').json()['state']
     
     await asyncio.sleep(1)#420) # Sleep until takeoff guaranteed complete
     
-    while state != END_STATE:
+    while state != "COMPLETE":
         current_location = await get_current_location(ugv)
-        
-        if state == 0:
+        if state == "STANDBY":
             if (dist_to_ground() < DETACH_THRESH and 
             (abs(current_location[0] - drop_location[0] < drop_bounds) and 
             abs(current_location[1] - drop_location[1] < drop_bounds))):
                 detach_from_uas()
+                requests.post(SERVER_ROUTE+'/state', json= {"state": "DETACHED"})
                 await ugv.action.arm()
                 await ugv.action.takeoff()
                 await asyncio.sleep(10) # Don't drive while tumbling through air
-                state = 1
-        elif state == 1:
+                requests.post(SERVER_ROUTE+'/state', json= {"state": "DRIVING"})
+        elif state == "DRIVING":
             await ugv.action.goto_location(*target_location)
-            state = 2
-        elif state == 2:
+            requests.post(SERVER_ROUTE+'/state', json= {"state": "COMPLETE"})
             report_mission_success()
-
+        state = requests.get(SERVER_ROUTE+'/state'.json()['state'])
 async def get_current_location(ugv):
     global saved_location
     data = []
@@ -82,6 +86,9 @@ async def get_current_location(ugv):
             break;
     except:
         data = saved_location
+    if data != [0, 0, 0, 0]:
+        requests.post(SERVER_ROUTE+'/state', json={"latitude":data[0], "longitude":data[1]})
+        
     saved_location = data
     return data
 
