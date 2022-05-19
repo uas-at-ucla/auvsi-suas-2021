@@ -125,7 +125,7 @@ class Mission:
             for obstacle in data['stationaryObstacles']:
                 self.stationaryObstacles.append(data_to_obstacle(obstacle))
 
-        self.mapCenterpos = data_to_mission_point(
+        self.mapCenterPos = data_to_mission_point(
             get_data(data, 'mapCenterPos', {}))
         self.mapHeight = get_data(data, 'mapHeight')
 
@@ -222,7 +222,7 @@ class Drone:
     async def _get_mission(self):
         '''Grabs mission data from the intermediary server and parses the response'''
 
-        data = await comms.get_mission(self)
+        data = await comms.get_mission()
         if data is not None:
             self.mission = Mission(data)
             if self.mission.mapCenterPos is not None:

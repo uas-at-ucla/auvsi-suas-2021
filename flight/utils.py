@@ -3,7 +3,7 @@ Helper function module
 """
 
 from typing import Tuple, Union
-
+import math
 
 COORD_EPSILON = 0.000005
 ALTITUDE_EPSILON = 1
@@ -146,22 +146,34 @@ def draw_border(min_x, min_y, max_x, max_y, resolution=1):
     
     return x_list, y_list
 
-def draw_line(min_x, min_y, max_x, max_y, resolution=1):
-    if (min_x > max_x):
-        return draw_border(max_x, min_y, min_x, max_y, resolution)
-    if (min_y > max_y):
-        return draw_border(min_x, max_y, max_x, min_y, resolution)
-    
+def draw_line(x0, y0, x1, y1, resolution=1):
     x_list = []
     y_list = []
     
-    dx = max_x - min_x
-    dy = max_y - min_y
+    dx = x1 - x0
+    dy = y1 - y0
     
-    for x in range(min_x, max_x + resolution, resolution):
-        y = min_y + dy * (x - min_x) / dx
+    distance = math.ceil(math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2))
+    
+    for i in range(distance):
+        t = i/distance
+        x = round(x0 + dx * t)
+        y = round(y0 + dy * t)
+        
+        if (i > 0 and abs(x - x_list[-1]) == 1 and abs(y - y_list[-1]) == 1):
+            tx = x - x_list[-1]
+            ty = y - y_list[-1]
+            
+            x_list.append(x - tx)
+            y_list.append(y)
+            
+            x_list.append(x)
+            y_list.append(y - ty)
+            
         x_list.append(x)
-        y_list.append(y)        
+        y_list.append(y)
+    
+    return x_list, y_list
         
 # Utility function for scaling one coordinate system to another coordinate system
 def scale_coords(x, y, prev_width, prev_height, new_width, new_height):

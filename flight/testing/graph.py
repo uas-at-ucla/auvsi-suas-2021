@@ -2,39 +2,39 @@
 import sys
 sys.path.append('../')
 
+from drone import Drone
 import matplotlib.pyplot as plt
 from utils import *
 from astar import AStar
 from datetime import datetime
+from communication import get_mission
+from drone import Mission
+from movement import DronePathfinder
+import asyncio
+import math
 
 # Initialize testing values
 drone_radius = 1
-sx, sy = -20.43, -20.1234
-ex, ey = 20.5321, 20.1234
-obstacle_buffer = 5
-cx, cy = 0, 0
-obstacle_radius = 10
 
-# Calculate obstacle circle
-ox, oy = draw_circle(cx, cy, obstacle_radius + obstacle_buffer)
-bx, by = draw_border(-30, -30, 30, 30)
-ox.extend(bx)
-oy.extend(by)
+mission = asyncio.get_event_loop().run_until_complete(get_mission())
+mission = Mission(mission)
+start_lat = mission.mapCenterPos.latitude
+start_lon = mission.mapCenterPos.longitude
 
-# Draw obstace, start, and end
-plt.plot(ox, oy, ".k", alpha=0.5)
-plt.plot(sx, sy, 'og')
-plt.plot(ex, ey, 'xb')
-plt.grid(True)
-plt.axis('equal')
-
-# Calculate path
 start = datetime.now()
-pathfinder = AStar(ox, oy, 1, drone_radius)
-rx, ry = pathfinder.planning(sx, sy, ex, ey)
+pathfinder = DronePathfinder(mission, start_lat, start_lon, 1000, 1000)
 end = datetime.now()
 print(f"TIME ELAPSED: {end-start}")
 
+
+# Draw obstace, start, and end
+plt.plot(pathfinder.ox, pathfinder.oy, ".k", alpha=0.5)
+plt.plot(pathfinder.sx, pathfinder.sy, 'og')
+plt.plot(pathfinder.wp_x, pathfinder.wp_y, 'xb')
+
+plt.grid(True)
+plt.axis('equal')
+
 # Draw path
-plt.plot(rx, ry, '-r')
+plt.plot(pathfinder.x_route, pathfinder.y_route, '-r')
 plt.show()

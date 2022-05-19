@@ -40,7 +40,6 @@ class AStar:
 
         open_set, closed_set = dict(), dict()
         open_set[self.calc_grid_index(start_node)] = start_node
-        print(self.min_x, self.max_x, self.min_y, self.max_y)
 
         while 1:
             if len(open_set) == 0:
@@ -168,23 +167,18 @@ class AStar:
         print("max_x:", self.max_x)
         print("max_y:", self.max_y)
 
-        self.x_width = round((self.max_x - self.min_x) / self.resolution)
-        self.y_width = round((self.max_y - self.min_y) / self.resolution)
+        self.x_width = round((self.max_x - self.min_x) / self.resolution + 1)
+        self.y_width = round((self.max_y - self.min_y) / self.resolution + 1)
         print("x_width:", self.x_width)
         print("y_width:", self.y_width)
 
         # obstacle map generation
         self.obstacle_map = [[False for _ in range(self.y_width)]
                              for _ in range(self.x_width)]
-        for ix in range(self.x_width):
-            x = self.calc_grid_position(ix, self.min_x)
-            for iy in range(self.y_width):
-                y = self.calc_grid_position(iy, self.min_y)
-                for iox, ioy in zip(ox, oy):
-                    d = math.hypot(iox - x, ioy - y)
-                    if d <= self.dr:
-                        self.obstacle_map[ix][iy] = True
-                        break
+        n = len(ox)
+        for i in range(n):
+            iox, ioy = ox[i], oy[i]
+            self.obstacle_map[iox][ioy] = True
 
     @staticmethod
     def get_motion_model():
