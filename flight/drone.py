@@ -278,7 +278,7 @@ class Drone:
             relative_altitude + self.ground_altitude,
             yaw)
 
-    async def traverse_waypoints(self, points: list[MissionPoint]):
+    async def traverse_waypoints(self, points: list):
         '''
         Travels through waypoints, returns when all points have been traversed
             Parameters:
