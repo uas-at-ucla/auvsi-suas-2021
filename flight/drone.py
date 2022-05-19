@@ -102,6 +102,8 @@ class Mission:
         if ('flyZones' in data):
             for zone in data['flyZones']:
                 self.flyZones.append(data_to_flyzone(zone))
+            if (len(data['flyZones']) > 0):
+                self.flyZone = self.flyZones[0]
 
         self.waypoints = get_list_of_points(data, 'waypoints')
         self.searchGridPoints = get_list_of_points(data, 'searchGridPoints')

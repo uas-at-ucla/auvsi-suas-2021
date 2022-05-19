@@ -162,3 +162,7 @@ def draw_line(min_x, min_y, max_x, max_y, resolution=1):
         y = min_y + dy * (x - min_x) / dx
         x_list.append(x)
         y_list.append(y)        
+        
+# Utility function for scaling one coordinate system to another coordinate system
+def scale_coords(x, y, prev_width, prev_height, new_width, new_height):
+    return (x / prev_width * new_width, y / prev_height * new_height)

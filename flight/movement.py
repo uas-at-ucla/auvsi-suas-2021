@@ -1,10 +1,12 @@
+from configparser import MAX_INTERPOLATION_DEPTH
 from typing import List
 from mavsdk import System
+from flight.astar import AStar
 from telemetry import TelemetryData
-from utils import compare_altitude, compare_position, ft_to_m, draw_circle
+from utils import *
 import asyncio
 from decouple import config
-from drone import Obstacle
+from drone import *
 
 UPDATE_TIME = 1
 
@@ -96,32 +98,91 @@ async def goto_location(
     print("Target location reached")
 
 
-async def return_to_home(drone: System, data: TelemetryData):
-    """
-    Procedure to return home
-        Parameters:
-            drone - MAVSDK system
-            telemetry_data - TelemetryData that holds the drone's most recent telemetry info
-    """
-    print("Returning Home")
-    await goto_location(drone, data, HOME_LAT, HOME_LON, data.absolute_altitude, 0)
-
-
 class DronePathfinder:
-    def __init__(self, mission):
-        self.set_mission(mission)
+    def __init__(self, mission, start_lat, start_lon, width = 1000, height = 1000):
+        self.set_mission(mission, start_lat, start_lon)
+        self.width = width
+        self.height = height
+        
+        self.min_latitude = None
+        self.max_latitude = None
+        self.delta_latitude = None
+        self.min_longitude = None
+        self.max_longitude = None
+        self.delta_longitude = None
+        
+        self.a_star = None
     
-    def set_mission(self, mission):
-        if mission.stationaryObstacles is not None:
-            self.obstacles = mission.stationaryObstacles
-            self.ox = []
-            self.oy = []
-            self._create_obstacles_points()
+    def set_mission(self, mission, start_lat, start_lon):
+        if (mission.stationaryObstacles is None): 
+            return
+        if (mission.boundaryPoints is None): 
+            return
+        if (mission.waypoints is None):
+            return
+        
+        self.obstacles = mission.stationaryObstacles
+        self.boundaryPoints = self.mission.flyZone.boundaryPoints
+        self.ox = []
+        self.oy = []
+        self.x_route = []
+        self.y_route = []
+        
+        self._create_world_map()
+        
+        self.a_star = AStar(self.ox, self.oy, 1, OBSTACLE_BUFFER_SPACE)
+        self._traverse_waypoints(start_lat, start_lon, mission.waypoints)
+
+    def _convert_coords(self, lat, lon):
+        new_x, new_y = scale_coords(lat, lon, self.delta_latitude, self.delta_longitude, self.width, self.height) 
+        return round(new_x), round(new_y)
+
+    def _traverse_waypoints(self, start_lat, start_lon, waypoints):
+        current_x, current_y = self._convert_coords(start_lat, start_lon)
+        for waypoint in waypoints:
+            x, y = self._convert_coords(waypoint.latitude, waypoint.longitude)
+            x_list, y_list = self.a_star.planning(current_x, current_y, x, y)
+            self.x_route.extend(x_list)
+            self.y_route.extend(y_list)
+
+    def _create_world_map(self):
+        self.min_latitude = self.boundaryPoints[0].latitude
+        self.max_latitude = self.boundaryPoints[0].latitude
+        self.min_longitude = self.boundaryPoints[0].longitude
+        self.max_longitude = self.boundaryPoints[0].longitude
+        
+        for bp in self.boundaryPoints:
+            lat = bp.latitude
+            lon = bp.longitude
+            self.min_latitude = min(self.min_latitude, lat)
+            self.max_latitude = max(self.max_latitude, lat)
+            self.min_longitude = min(self.min_longitude, lon)
+            self.max_longitude = max(self.max_longitude, lon)
+    
+        self.delta_latitude = self.max_latitude - self.min_latitude
+        self.delta_longitude = self.max_longitude - self.min_longitude
+        
+        self._create_borders()
+        self._create_obstacles_points()
+    
+    def _create_borders(self):
+        n = len(self.boundaryPoints)
+        for i in range(n):
+            bp0 = self.boundaryPoints[i]
+            lat0 = bp0.latitude
+            lon0 = bp0.longitude
+            x0, y0 = self._convert_coords(lat0, lon0)
+
+            bp1 = self.boundaryPoints[i+1 % n]
+            lat1 = bp1.latitude
+            lon1 = bp1.longitude
+            x1, y1 = self._convert_coords(lat1, lon1)
+            
+            x_list, y_list = draw_line(x0, y0, x1, y1)
+            self.ox.extend(x_list)
+            self.oy.extend(y_list)
     
     def _create_obstacles_points(self):
-        ox: List[int] = [] # Obstacle points x
-        oy: List[int] = [] # Obstacle points y 
-        
         obstacle: Obstacle
         for obstacle in self.obstacles:
             # TODO: figure out lon/lat conversion to int grid
@@ -129,8 +190,5 @@ class DronePathfinder:
             cy = obstacle.latitude
             r = obstacle.radius + OBSTACLE_BUFFER_SPACE
             x_list, y_list = draw_circle(cx, cy, r)
-            ox.extend(x_list)
-            oy.extend(y_list)
-            
-        self.ox = ox
-        self.oy = oy
+            self.ox.extend(x_list)
+            self.oy.extend(y_list)

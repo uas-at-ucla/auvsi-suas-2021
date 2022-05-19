@@ -3,10 +3,6 @@ import matplotlib.pyplot as plt
 
 show_animation = False
 
-# Utility function for scaling one coordinate system to another coordinate system
-def scale_coords(x, y, prev_width, prev_height, new_width, new_height):
-        return (x / prev_width * new_width, y / prev_height * new_height)
-
 class AStar:
     #given list of no go x coordinates, y coordinates, grid resolution, and drone radius, all in meters
     #creates grid map
