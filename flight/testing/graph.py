@@ -21,11 +21,7 @@ mission = Mission(mission)
 start_lat = mission.mapCenterPos.latitude
 start_lon = mission.mapCenterPos.longitude
 
-start = datetime.now()
 pathfinder = DronePathfinder(mission, start_lat, start_lon, 1000, 1000)
-end = datetime.now()
-print(f"TIME ELAPSED: {end-start}")
-
 
 # Draw obstace, start, and end
 plt.plot(pathfinder.ox, pathfinder.oy, ".k", alpha=0.5)
@@ -35,6 +31,21 @@ plt.plot(pathfinder.wp_x, pathfinder.wp_y, 'xb')
 plt.grid(True)
 plt.axis('equal')
 
-# Draw path
-plt.plot(pathfinder.x_route, pathfinder.y_route, '-r')
 plt.show()
+
+if (False):
+    start = datetime.now()
+    pathfinder.run_mission()
+    end = datetime.now()
+    print(f"TIME ELAPSED: {end-start}")
+
+    # Draw path
+    plt.plot(pathfinder.ox, pathfinder.oy, ".k", alpha=0.5)
+    plt.plot(pathfinder.sx, pathfinder.sy, 'og')
+    plt.plot(pathfinder.wp_x, pathfinder.wp_y, 'xb')
+
+    plt.grid(True)
+    plt.axis('equal')
+    plt.plot(pathfinder.x_route, pathfinder.y_route, '-r')
+
+    plt.show()

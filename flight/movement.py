@@ -138,8 +138,14 @@ class DronePathfinder:
         current_x, current_y = self._convert_coords(start_lat, start_lon)
         self.sx, self.sy = current_x, current_y
         
-        # self.a_star = AStar(self.ox, self.oy, 1, OBSTACLE_BUFFER_SPACE)
-        # self._traverse_waypoints(start_lat, start_lon, mission.waypoints)
+        self.a_star = AStar(self.ox, self.oy, 1, OBSTACLE_BUFFER_SPACE)
+        self.waypoints = mission.waypoints
+        # self._traverse_waypoints(start_lat, start_lon)
+
+    def run_mission(self):
+        start = self.waypoints[0]
+        start_lat, start_lon = start.latitude, start.longitude
+        self._traverse_waypoints(start_lat, start_lon, self.waypoints)
 
     def _convert_coords(self, lat, lon):
         new_x, new_y = scale_coords(lat - self.min_latitude, lon - self.min_longitude, self.delta_latitude, self.delta_longitude, self.width, self.height) 
@@ -201,10 +207,12 @@ class DronePathfinder:
     
     def _create_obstacles_points(self):
         for obstacle in self.obstacles:
-            # TODO: figure out lon/lat conversion to int grid
             c_lat = obstacle.latitude
             c_lon = obstacle.longitude
-            r = int((obstacle.radius + OBSTACLE_BUFFER_SPACE) / 5)
+            lat_r = int(obstacle.radius / 364_000 / self.delta_latitude * self.height)
+            lon_r = int(obstacle.radius / 288_200 / self.delta_longitude * self.height)
+            r = max(lat_r, lon_r) + OBSTACLE_BUFFER_SPACE
+            print(r)
             cx, cy = self._convert_coords(c_lat, c_lon)
             x_list, y_list = draw_circle(cx, cy, r)
             self.ox.extend(x_list)

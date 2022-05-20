@@ -110,14 +110,14 @@ export default class DroneRouter {
 
     async get_mission(req, res, id=-1) {
         if (this.interops_server.connected) {
-            let mission = await this.interops_server.get_mission(1); // TODO: check how to get correct mission id
+            let mission = await this.interops_server.get_mission(2); // TODO: check how to get correct mission id
             //console.log(mission);
             if (mission) {
                 this.drone.current_mission = mission;
                 console.log("DEBUG: Got current mission data from Interops Server");
             }
             else if (mission === undefined) {
-                console.log("DEBUG: Failed to get telemtry from Interops Server");
+                console.log("DEBUG: Failed to get mission data from Interops Server");
             }
         }
         // console.log(this.drone.get_mission_id())
