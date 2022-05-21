@@ -29,6 +29,16 @@ def kn_to_ftps(num):
     return num * 1.68781
 
 
+def get_bearing(lat0, lon0, lat1, lon1):
+    dlon = lon1 - lon0
+    x = math.sin(dlon) * math.cos(lat1)
+    y = math.cos(lat0) * math.sin(lat1) - \
+        math.sin(lat0) * math.sin(lat1) * math.cos(dlon)
+    bearing = math.atan2(x, y)
+    bearing = math.degrees(bearing)
+    bearing = (bearing + 360) % 360
+    return bearing
+
 def compare_coords(
         coords1: Tuple[Union[float, None], Union[float, None]],
         coords2: Tuple[Union[float, None], Union[float, None]],

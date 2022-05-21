@@ -167,11 +167,11 @@ class DronePathfinder:
         return lat_list, lon_list
 
     def _convert_coords(self, lat, lon):
-        new_x, new_y = scale_coords(lat - self.min_latitude, lon - self.min_longitude, self.delta_latitude, self.delta_longitude, self.width, self.height) 
+        new_x, new_y = scale_coords(lon - self.min_longitude, lat - self.min_latitude, self.delta_longitude, self.delta_latitude, self.width, self.height) 
         return round(new_x), round(new_y)
     
     def _deconvert_coords(self, x, y):
-        lat, lon = scale_coords(x, y, self.width, self.height, self.delta_latitude, self.delta_longitude)
+        lon, lat = scale_coords(x, y, self.width, self.height, self.delta_longitude, self.delta_latitude)
         return lat + self.min_latitude, lon + self.min_longitude
 
     def _traverse_waypoints(self, start_lat, start_lon, waypoints):

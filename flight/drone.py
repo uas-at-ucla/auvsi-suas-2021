@@ -7,6 +7,7 @@ import communication as comms
 import asyncio
 from movement import *
 from decouple import config
+from utils import get_bearing
 
 MAVLINK_PORT = config("MAVLINK", default=None)
 USE_INTERMEDIARY = config("USE_INTERMEDIARY", default=False, cast=bool)
@@ -304,6 +305,8 @@ class Drone:
             n = len(lat_list)
             d_alt = (point.altitude - current_alt) / n 
             
+            next_lat = current_lat
+            next_lon = current_lon
             for i in range(n):
                 mission_items.append(
                     MissionItem(
@@ -318,9 +321,11 @@ class Drone:
                         0,
                         0,
                         MISSION_POINT_TOL,
-                        0
+                        get_bearing(next_lat, next_lon, lat_list[i], lon_list[i])
                     )
                 )
+                next_lat = lat_list[i]
+                next_lon = lon_list[i]
                 
             current_lat = point.latitude
             current_lon = point.longitude
