@@ -225,7 +225,7 @@ class DronePathfinder:
             lon1 = bp1.longitude
             x1, y1 = self._convert_coords(lat1, lon1)
             
-            x_list, y_list = draw_line(x0, y0, x1, y1)
+            x_list, y_list = draw_line(x0, y0, x1, y1, max_x=self.width, max_y=self.height)
             self.ox.extend(x_list)
             self.oy.extend(y_list)
             
@@ -239,6 +239,6 @@ class DronePathfinder:
             r = max(lat_r, lon_r) + OBSTACLE_BUFFER_SPACE
             print(r)
             cx, cy = self._convert_coords(c_lat, c_lon)
-            x_list, y_list = draw_circle(cx, cy, r)
+            x_list, y_list = draw_circle(cx, cy, r, max_x=self.width, max_y=self.height)
             self.ox.extend(x_list)
             self.oy.extend(y_list)

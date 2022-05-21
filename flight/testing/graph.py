@@ -21,7 +21,7 @@ mission = Mission(mission)
 start_lat = mission.mapCenterPos.latitude
 start_lon = mission.mapCenterPos.longitude
 
-pathfinder = DronePathfinder(mission, start_lat, start_lon, 1000, 1000)
+pathfinder = DronePathfinder(mission, start_lat, start_lon, 500, 500)
 
 # Draw obstace, start, and end
 plt.plot(pathfinder.ox, pathfinder.oy, ".k", alpha=0.5)
@@ -33,7 +33,7 @@ plt.axis('equal')
 
 plt.show()
 
-if (True):
+if (False):
     start = datetime.now()
     pathfinder.run_mission()
     end = datetime.now()
