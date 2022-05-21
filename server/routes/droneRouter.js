@@ -120,6 +120,17 @@ export default class DroneRouter {
                 console.log("DEBUG: Failed to get mission data from Interops Server");
             }
         }
+        else {
+            let mission = fs.readFileSync('./mission.json')
+            mission = JSON.parse(mission)
+            if (mission) {
+                this.drone.current_mission = mission
+                console.log("DEBUG: Got mission from mission.json")
+            }
+            else if (mission === undefined) {
+                console.log("DEBUG: Failed to get mission from mission.json")
+            }
+        }
         // console.log(this.drone.get_mission_id())
         res.status(200).json(this.drone.current_mission);
     }

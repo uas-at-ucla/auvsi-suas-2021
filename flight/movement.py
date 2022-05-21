@@ -140,7 +140,10 @@ class DronePathfinder:
         
         self.a_star = AStar(self.ox, self.oy, 1, OBSTACLE_BUFFER_SPACE)
         self.waypoints = mission.waypoints
-        # self._traverse_waypoints(start_lat, start_lon)
+        for i, waypoint in enumerate(self.waypoints):
+            x, y = self._convert_coords(waypoint.latitude, waypoint.longitude)
+            self.wp_x.append(x)
+            self.wp_y.append(y)
 
     def run_mission(self):
         start = self.waypoints[0]
@@ -183,6 +186,9 @@ class DronePathfinder:
     
         self.delta_latitude = self.max_latitude - self.min_latitude
         self.delta_longitude = self.max_longitude - self.min_longitude
+        
+        print(f"Delta Latitude: {self.delta_latitude}")
+        print(f"Delta Longitude: {self.delta_longitude}")
         
         self._create_borders()
         self._create_obstacles_points()

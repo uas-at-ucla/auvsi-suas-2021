@@ -93,7 +93,8 @@ def compare_position(
         compare_altitude(pos1[2], pos2[2], altitude_epsilon)
 
 
-def draw_circle(cx: int, cy: int, r: int, resolution: float = 1):
+def draw_circle(cx: int, cy: int, r: int, resolution: float = 1, min_x = 0, min_y = 0, 
+              max_x = 1000, max_y = 1000):
     """Convert circle coords into a list of x and y values in that circle
 
     Args:
@@ -114,9 +115,9 @@ def draw_circle(cx: int, cy: int, r: int, resolution: float = 1):
             distance = x*x + y*y    # distance to the center
             if (distance >= r2):
                 continue
-
-            x_list.append(cx + x)
-            y_list.append(cy + y)
+            if (min_x <= cx + x <= max_x and min_y <= cy + y <= max_y):
+                x_list.append(cx + x)
+                y_list.append(cy + y)
     
     return x_list, y_list
 
@@ -146,7 +147,9 @@ def draw_border(min_x, min_y, max_x, max_y, resolution=1):
     
     return x_list, y_list
 
-def draw_line(x0, y0, x1, y1, resolution=1):
+def draw_line(x0, y0, x1, y1, thickness = 5, 
+              min_x = 0, min_y = 0, 
+              max_x = 1000, max_y = 1000):
     x_list = []
     y_list = []
     
@@ -160,18 +163,28 @@ def draw_line(x0, y0, x1, y1, resolution=1):
         x = round(x0 + dx * t)
         y = round(y0 + dy * t)
         
-        if (i > 0 and abs(x - x_list[-1]) == 1 and abs(y - y_list[-1]) == 1):
-            tx = x - x_list[-1]
-            ty = y - y_list[-1]
+        # if (i > 0 and abs(x - x_list[-1]) == 1 and abs(y - y_list[-1]) == 1):
+        #     tx = x - x_list[-1]
+        #     ty = y - y_list[-1]
             
-            x_list.append(x - tx)
-            y_list.append(y)
+        #     x_list.append(x - tx)
+        #     y_list.append(y)
             
-            x_list.append(x)
-            y_list.append(y - ty)
+        #     x_list.append(x)
+        #     y_list.append(y - ty)
+        
+        r2 = thickness * thickness
+        for i in range(max(min_x, x-thickness), min(max_x, x+thickness)+1):
+            for j in range(max(min_y, y-thickness), min(max_y, y+thickness)+1):
+                d_x = (i - x)
+                d_y = (j - y)
+                d = d_x * d_x + d_y * d_y
+                if (d < r2):
+                    x_list.append(i)
+                    y_list.append(j)
             
-        x_list.append(x)
-        y_list.append(y)
+        # x_list.append(x)
+        # y_list.append(y)
     
     return x_list, y_list
         
