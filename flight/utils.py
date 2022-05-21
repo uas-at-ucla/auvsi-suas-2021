@@ -30,13 +30,11 @@ def kn_to_ftps(num):
 
 
 def get_bearing(lat0, lon0, lat1, lon1):
-    dlon = lon1 - lon0
-    x = math.sin(dlon) * math.cos(lat1)
-    y = math.cos(lat0) * math.sin(lat1) - \
-        math.sin(lat0) * math.sin(lat1) * math.cos(dlon)
-    bearing = math.atan2(x, y)
-    bearing = math.degrees(bearing)
-    bearing = (bearing + 360) % 360
+    dx = lon1 - lon0
+    dy = lat1 - lat0
+    bearing = math.atan2(dy, dx)
+    bearing = math.degrees(bearing) - 90
+    bearing = (360 - bearing) % 360
     return bearing
 
 def compare_coords(
