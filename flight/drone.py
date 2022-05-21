@@ -7,6 +7,7 @@ import communication as comms
 import asyncio
 from movement import *
 from decouple import config
+from utils import *
 
 MAVLINK_PORT = config("MAVLINK", default=None)
 USE_INTERMEDIARY = config("USE_INTERMEDIARY", default=False, cast=bool)
@@ -20,8 +21,8 @@ HEARTBEAT_RATE = 0.5
 RTH_TIMEOUT = 30
 LAND_TIMEOUT = 180
 
-DRONE_SPEED = 1 # m/s because why not?
-MISSION_POINT_TOL = 0.2
+DRONE_SPEED = 5 # m/s because why not?
+MISSION_POINT_TOL = 3
 
 # ================================================================
 #             Utils for JSON dictionary to objects
@@ -218,7 +219,6 @@ class Drone:
                 # TODO: check if last_ground_contact is acceptable, otherwise return home
 
                 mission_id = get_data(data, "currentMissionId")
-                # print("HEARTBEAT!", data)
                 if (mission_id is None or self.mission is None or self.mission.id != mission_id):
                     await self._get_mission()
             await asyncio.sleep(HEARTBEAT_RATE)
@@ -288,12 +288,14 @@ class Drone:
             Parameters:
                 points: - list of MissionPoints
         '''
+        print("Traversing waypoints")
         current_lat = self.telemetry.latitude
         current_lon = self.telemetry.longitude
         current_alt = self.telemetry.relative_altitude
         
         mission_items = []
-        for point in points:
+        for i, point in enumerate(points):
+            print(f"Waypoint {i+1}/{len(points)}")
             lat_list, lon_list = self.pathfinder.get_path(
                 current_lat,
                 current_lon,
@@ -309,7 +311,7 @@ class Drone:
                     MissionItem(
                         lat_list[i],
                         lon_list[i],
-                        current_alt + (d_alt * i),
+                        ft_to_m(current_alt + (d_alt * i)),
                         DRONE_SPEED,
                         True,
                         0,
@@ -327,12 +329,12 @@ class Drone:
             current_alt = point.altitude
         mission_plan = MissionPlan(mission_items)
         await self.system.mission.upload_mission(mission_plan)
+        await asyncio.sleep(1)
         await self.system.mission.start_mission()
         
-        while (not await self.system.mission.is_mission_finished()):
-            progress = await self.system.mission.mission_progress().__anext__
+        async for progress in self.system.mission.mission_progress():
             print(f"Item: {progress.current}/{progress.total}, LAT: {self.telemetry.latitude}, LON: {self.telemetry.longitude}, REL_ALT: {self.telemetry.relative_altitude}")
-            await asyncio.sleep(1)
+            # await asyncio.sleep(1)
         print("Mission Done")
         
             
@@ -364,11 +366,13 @@ class Drone:
         takeoff_alt = 100
         if (len(flyzones) > 0): 
             takeoff_alt = flyzones[0].altitudeMin + 10
-            
+        
+        print("Creating Pathfinder")
         self.pathfinder = DronePathfinder(
             self.mission, 
             self.telemetry.latitude,
-            self.telemetry.longitude
+            self.telemetry.longitude,
+            500, 500
         )
 
         await self.takeoff(takeoff_alt)

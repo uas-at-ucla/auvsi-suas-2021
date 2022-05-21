@@ -29,12 +29,17 @@ async def main():
     print("GPS confirmed!")
 
     if drone.telemetry.is_in_air:
+        print("Landing first")
         await drone.return_home()
         await drone.land()
     
+    print("Starting Mission")
+    await asyncio.sleep(1)
     await drone.start_mission()
 
     await asyncio.sleep(1)
+    print("FINISHED!")
+    asyncio.get_event_loop().stop()
 
 
 if __name__ == "__main__":
