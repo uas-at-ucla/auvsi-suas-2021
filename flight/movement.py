@@ -6,7 +6,6 @@ from telemetry import TelemetryData
 from utils import *
 import asyncio
 from decouple import config
-from drone import *
 
 UPDATE_TIME = 1
 
