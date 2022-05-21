@@ -149,10 +149,30 @@ class DronePathfinder:
         start = self.waypoints[0]
         start_lat, start_lon = start.latitude, start.longitude
         self._traverse_waypoints(start_lat, start_lon, self.waypoints)
+        
+    def get_path(self, s_lat, s_lon, g_lat, g_lon):
+        sx, sy = self._convert_coords(s_lat, s_lon)
+        gx, gy = self._convert_coords(g_lat, g_lon)
+        print(f"Pathing from {s_lat}, {s_lon} to {g_lat}, {g_lon}...", end="")
+        x_list, y_list = self.a_star.planning(gx, gy, sx, sy)
+        print("DONE")
+        
+        # Convert x_list, y_list to latitude and longitude
+        lat_list, lon_list = [], []
+        n = len(x_list)
+        for i in range(n):
+            lat, lon = self._deconvert_coords(x_list[i], y_list[i])
+            lat_list.append(lat)
+            lon_list.append(lon)
+        return lat_list, lon_list
 
     def _convert_coords(self, lat, lon):
         new_x, new_y = scale_coords(lat - self.min_latitude, lon - self.min_longitude, self.delta_latitude, self.delta_longitude, self.width, self.height) 
         return round(new_x), round(new_y)
+    
+    def _deconvert_coords(self, x, y):
+        lat, lon = scale_coords(x, y, self.width, self.height, self.delta_latitude, self.delta_longitude)
+        return lat + self.min_latitude, lon + self.min_longitude
 
     def _traverse_waypoints(self, start_lat, start_lon, waypoints):
         current_x, current_y = self._convert_coords(start_lat, start_lon)

@@ -1,6 +1,7 @@
 from ctypes import cast
 from datetime import datetime, timezone
 from mavsdk import System
+from mavsdk.mission import MissionItem, MissionPlan
 from telemetry import TelemetryData
 import communication as comms
 import asyncio
@@ -18,6 +19,9 @@ from typing import Union
 HEARTBEAT_RATE = 0.5
 RTH_TIMEOUT = 30
 LAND_TIMEOUT = 180
+
+DRONE_SPEED = 1 # m/s because why not?
+MISSION_POINT_TOL = 0.2
 
 # ================================================================
 #             Utils for JSON dictionary to objects
@@ -284,10 +288,54 @@ class Drone:
             Parameters:
                 points: - list of MissionPoints
         '''
-
+        current_lat = self.telemetry.latitude
+        current_lon = self.telemetry.longitude
+        current_alt = self.telemetry.relative_altitude
+        
+        mission_items = []
         for point in points:
-            # TODO: Add pathfinding + smoothing algorithm
-            await self.goto(point.latitude, point.longitude, point.altitude, 0)
+            lat_list, lon_list = self.pathfinder.get_path(
+                current_lat,
+                current_lon,
+                point.latitude,
+                point.longitude
+            )
+            
+            n = len(lat_list)
+            d_alt = (point.altitude - current_alt) / n 
+            
+            for i in range(n):
+                mission_items.append(
+                    MissionItem(
+                        lat_list[i],
+                        lon_list[i],
+                        current_alt + (d_alt * i),
+                        DRONE_SPEED,
+                        True,
+                        0,
+                        0,
+                        MissionItem.CameraAction.NONE,
+                        0,
+                        0,
+                        MISSION_POINT_TOL,
+                        0
+                    )
+                )
+                
+            current_lat = point.latitude
+            current_lon = point.longitude
+            current_alt = point.altitude
+        mission_plan = MissionPlan(mission_items)
+        await self.system.mission.upload_mission(mission_plan)
+        await self.system.mission.start_mission()
+        
+        while (not await self.system.mission.is_mission_finished()):
+            progress = await self.system.mission.mission_progress().__anext__
+            print(f"Item: {progress.current}/{progress.total}, LAT: {self.telemetry.latitude}, LON: {self.telemetry.longitude}, REL_ALT: {self.telemetry.relative_altitude}")
+            await asyncio.sleep(1)
+        print("Mission Done")
+        
+            
 
     async def airdrop(self):
         # TODO: Implement the airdrop method for drone.
@@ -316,6 +364,12 @@ class Drone:
         takeoff_alt = 100
         if (len(flyzones) > 0): 
             takeoff_alt = flyzones[0].altitudeMin + 10
+            
+        self.pathfinder = DronePathfinder(
+            self.mission, 
+            self.telemetry.latitude,
+            self.telemetry.longitude
+        )
 
         await self.takeoff(takeoff_alt)
         await self.traverse_waypoints(points=waypoints)
