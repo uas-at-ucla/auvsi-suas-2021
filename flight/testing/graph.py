@@ -33,7 +33,7 @@ plt.axis('equal')
 
 plt.show()
 
-if (False):
+if (True):
     start = datetime.now()
     pathfinder.run_mission()
     end = datetime.now()
