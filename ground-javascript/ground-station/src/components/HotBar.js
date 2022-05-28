@@ -47,12 +47,15 @@ function HotBar() {
         axios.get(serverAddress + "/ugv/heartbeat").then((response) => {
             const telemetry = response.data;
             setUgvTelemetry({
-                latitude: telemetry.latitude,
-                longitude: telemetry.latitude,
-                altitude: telemetry.altitude,
+                latitude: roundVal(telemetry.latitude),
+                longitude: roundVal(telemetry.latitude),
+                altitude: roundVal(telemetry.altitude),
                 state: ugvTelemetry.state
             })
         })
+    }
+
+    const getUgvState = () => {
         axios.get(serverAddress + "/ugv/state").then((response) => {
             const new_state = response.data.state;
             setUgvTelemetry({
@@ -67,6 +70,7 @@ function HotBar() {
     useInterval(async () => {
         getDroneTelemetry();
         getUgvTelemetry();
+        getUgvState();
     }, POLL_INTERVAL)
 
     return(
