@@ -5,10 +5,12 @@ from mavsdk import telemetry
 import requests
 import numpy as np
 
+SERVER_ROUTE = 'localhost:3000/ugv'
+
 END_STATE = 2
 DETACH_THRESH = 1 # TODO
 
-SERVER_ROUTE = 'localhost:3000/ugv'
+saved_location = [0, 0, 0, 0]
 
 def dist_to_ground():
     return 0.5 # TEMP
@@ -99,11 +101,8 @@ async def run_ugv_mission():
     
     await asyncio.sleep(1)#420) # Sleep until takeoff guaranteed complete
     
-    #get current_location
-
-  
     while state != "COMPLETE":
-        current_location = get_current_location(ugv)
+        current_location = await get_current_location(ugv)
         if state == "STANDBY":
             if (dist_to_ground() < DETACH_THRESH and point_in_bounds(drop_location_data_array, current_location)):
                 detach_from_uas()
@@ -119,11 +118,19 @@ async def run_ugv_mission():
             #report_mission_success()
         state = get(SERVER_ROUTE+'/state'.json()['state'])
 async def get_current_location(ugv):
-    async for current_location in ugv.telemetry.position():
-        data = [current_location.latitude_deg, current_location.longitude_deg, 0, 0]
-        post(SERVER_ROUTE+'/heartbeat', json={"latitude":data[0], "longitude":data[1]})
-        return data
-
+    global saved_location
+    data = []
+    try:
+        async for current_location in ugv.telemetry.position():
+            data = [current_location.latitude_deg, current_location.longitude_deg, 0, 0]
+            break
+    except:
+        data = saved_location
+    if data != [0, 0, 0, 0]:
+        post(SERVER_ROUTE+'/state', json={"latitude":data[0], "longitude":data[1]})
+        
+    saved_location = data
+    return data
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
