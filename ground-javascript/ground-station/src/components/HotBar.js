@@ -26,7 +26,7 @@ function HotBar() {
         latitude: 0,
         longitude: 0,
         altitude: 0,
-        isGrounded: false,
+        state: "STANDBY",
     })
 
     const getDroneTelemetry = () => {
@@ -44,14 +44,29 @@ function HotBar() {
     }
 
     const getUgvTelemetry = () => {
-        axios.get(serverAddress + "/ground/heartbeat").then((response) => {
-            setUgvTelemetry(response.data.droneTelemetry)
+        axios.get(serverAddress + "/ugv/heartbeat").then((response) => {
+            const telemetry = response.data;
+            setUgvTelemetry({
+                latitude: telemetry.latitude,
+                longitude: telemetry.latitude,
+                altitude: telemetry.altitude,
+                state: ugvTelemetry.state
+            })
+        })
+        axios.get(serverAddress + "/ugv/state").then((response) => {
+            const new_state = response.data.state;
+            setUgvTelemetry({
+                latitude: ugvTelemetry.latitude,
+                longitude: ugvTelemetry.latitude,
+                altitude: ugvTelemetry.altitude,
+                state: new_state,
+            })
         })
     }
 
     useInterval(async () => {
-        getDroneTelemetry()
-        // console.log("setDroneTelemetry")
+        getDroneTelemetry();
+        getUgvTelemetry();
     }, POLL_INTERVAL)
 
     return(
@@ -68,7 +83,7 @@ function HotBar() {
             </div>
             <div className="vehicle-section">
                 <div className="vehicle-header"><AiFillCar /></div>
-                <BarMetric name="Grounded" value={ugvTelemetry.isGrounded ? "Yes" : "No"} vehicle="ugv"/>
+                <BarMetric name="Grounded" value={ugvTelemetry.state} vehicle="ugv"/>
                 <BarMetric name="Latitude (°)" value={ugvTelemetry.latitude} vehicle="ugv"/>
                 <BarMetric name="Longitude (°)" value={ugvTelemetry.longitude} vehicle="ugv"/>
             </div>
