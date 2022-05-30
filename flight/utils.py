@@ -34,7 +34,7 @@ def get_bearing(lat0, lon0, lat1, lon1):
     dy = lat1 - lat0
     bearing = math.atan2(dy, dx)
     bearing = math.degrees(bearing) - 90
-    bearing = (360 - bearing) % 360
+    bearing = (360 + bearing) % 360
     return bearing
 
 def compare_coords(

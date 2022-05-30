@@ -206,12 +206,13 @@ class DronePathfinder:
                 if ((p[0], p[1]) in self.obstacle_points):
                     flag = False
                     break
-            if not flag or current == n - 2:
+            if not flag:
                 new_x_list.append(x_list[current])
                 new_y_list.append(y_list[current])
             current += 1
+        new_x_list.append(x_list[-1])
+        new_y_list.append(y_list[-1])
         return new_x_list, new_y_list
-                
             
 
     def _create_world_map(self):
