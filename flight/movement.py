@@ -152,6 +152,7 @@ class DronePathfinder:
         gx, gy = self._convert_coords(g_lat, g_lon)
         print(f"Pathing from {s_lat}, {s_lon} to {g_lat}, {g_lon}...", end="")
         x_list, y_list = self.a_star.planning(gx, gy, sx, sy)
+        x_list, y_list = self._clean_route(x_list, y_list)
         print("DONE")
         
         # Convert x_list, y_list to latitude and longitude
