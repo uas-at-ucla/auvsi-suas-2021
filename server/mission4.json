@@ -1,0 +1,61 @@
+{
+    "id": 3,
+    "lostCommsPos": {
+        "latitude": 34.072919231663214, 
+        "longitude": -118.44682619777087
+    },
+    "flyZones": [
+        {
+            "altitudeMin": 10.0,
+            "altitudeMax": 20.0,
+            "boundaryPoints": [
+                {
+                    "latitude": 34.07294981839504, 
+                    "longitude": -118.44685570365864
+                },
+                {
+                    "latitude": 34.072954993119055, 
+                    "longitude": -118.44632312851364
+                },
+                {
+                    "latitude": 34.07246080554738, 
+                    "longitude": -118.44632312851364
+                },
+                {
+                    "latitude": 34.0724582181703, 
+                    "longitude": -118.44685101824696
+                }
+            ]
+        }
+    ],
+    "stationaryObstacles": [
+        {
+            "latitude": 34.07273371605744,
+            "longitude": -118.44656065909996,
+            "radius": 45,
+            "height": 20
+        }
+    ],
+    "mapCenterPos": {
+        "latitude": 34.072915899051125,
+        "longitude": -118.44681546893567 
+    },
+    "waypoints": [
+        {
+            "latitude": 34.072915899051125,
+            "longitude": -118.44681546893567,
+            "altitude": 10 
+        },
+        {
+            "latitude": 34.0729070120849,
+            "longitude": -118.44643243822027,
+            "altitude": 20 
+        },
+        {
+            "latitude": 34.07255375442293, 
+            "longitude": -118.44655261247358,
+            "altitude": 15 
+        }
+    ],
+    "mapHeight": 20
+}

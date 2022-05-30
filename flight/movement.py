@@ -1,5 +1,3 @@
-from configparser import MAX_INTERPOLATION_DEPTH
-from typing import List
 from mavsdk import System
 from astar import AStar
 from telemetry import TelemetryData
@@ -184,10 +182,36 @@ class DronePathfinder:
             print(i, current_x, current_y, x, y)
             
             x_list, y_list = self.a_star.planning(x, y, current_x, current_y)
+            x_list, y_list = self._clean_route(x_list, y_list)
             self.x_route.extend(x_list)
             self.y_route.extend(y_list)
             
             current_x, current_y = x, y
+    
+    def _clean_route(self, x_list, y_list):
+        n = len(x_list)
+        if n < 2:
+            return x_list, y_list
+        new_x_list = [x_list[0]]
+        new_y_list = [y_list[0]]
+        current = 1
+        while current < n - 1:
+            x0 = new_x_list[-1]
+            y0 = new_y_list[-1]
+            x1 = x_list[current + 1]
+            y1 = y_list[current + 1]
+            flag = True
+            for p in zip(*draw_line(x0, y0, x1, y1, thickness=0, max_x=self.width, max_y=self.height)):
+                if ((p[0], p[1]) in self.obstacle_points):
+                    flag = False
+                    break
+            if not flag or current == n - 2:
+                new_x_list.append(x_list[current])
+                new_y_list.append(y_list[current])
+            current += 1
+        return new_x_list, new_y_list
+                
+            
 
     def _create_world_map(self):
         self.min_latitude = self.boundaryPoints[0].latitude
@@ -211,6 +235,10 @@ class DronePathfinder:
         
         self._create_borders()
         self._create_obstacles_points()
+        
+        self.obstacle_points = set()
+        for p in zip(self.ox, self.oy):
+            self.obstacle_points.add((p[0], p[1]))
     
     def _create_borders(self):
         n = len(self.boundaryPoints)
@@ -234,11 +262,12 @@ class DronePathfinder:
         for obstacle in self.obstacles:
             c_lat = obstacle.latitude
             c_lon = obstacle.longitude
-            lat_r = int(obstacle.radius / 364_000 / self.delta_latitude * self.height)
-            lon_r = int(obstacle.radius / 288_200 / self.delta_longitude * self.height)
-            r = max(lat_r, lon_r) + OBSTACLE_BUFFER_SPACE
+            radius = obstacle.radius + OBSTACLE_BUFFER_SPACE
+            lat_r = int(radius / 364_000 / self.delta_latitude * self.height)
+            lon_r = int(radius / 288_200 / self.delta_longitude * self.height)
+            r = max(lat_r, lon_r)
             print(r)
             cx, cy = self._convert_coords(c_lat, c_lon)
-            x_list, y_list = draw_circle(cx, cy, r, max_x=self.width, max_y=self.height)
+            x_list, y_list = draw_octagon(cx, cy, r, max_x=self.width, max_y=self.height)
             self.ox.extend(x_list)
             self.oy.extend(y_list)

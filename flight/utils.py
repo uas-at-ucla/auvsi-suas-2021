@@ -130,6 +130,43 @@ def draw_circle(cx: int, cy: int, r: int, resolution: float = 1, min_x = 0, min_
     return x_list, y_list
 
 
+def draw_octagon(cx: int, cy: int, r: int, resolution: float = 1, min_x = 0, min_y = 0,
+                max_x = 1000, max_y = 1000):
+    x_list = []
+    y_list = []
+    
+    s = r / (1 + math.sqrt(2))
+    s = math.ceil(s)
+    h = math.sqrt(2) * s
+    h = math.ceil(h)
+    r = s + h
+    
+    print(s, h, r)
+    
+    for i in range(0, h, resolution):
+        for j in range(-s-i, s+i+resolution, resolution):
+            x = cx + j
+            y0 = cy + s + (h - i)
+            y1 = cy - s - (h - i)
+            
+            if (min_x <= x <= max_x and min_y <= y0 <= max_y):
+                x_list.append(x)
+                y_list.append(y0)
+            if (min_x <= x <= max_x and min_y <= y1 <= max_y):
+                x_list.append(x)
+                y_list.append(y1)
+            
+    for i in range(-s, s+resolution, resolution):
+        for j in range(-r, r+resolution, resolution):
+            x = cx + j
+            y = cy + i
+            if (min_x <= x <= max_x and min_y <= y <= max_y):
+                x_list.append(x)
+                y_list.append(y)
+            
+    return x_list, y_list
+
+
 def draw_border(min_x, min_y, max_x, max_y, resolution=1):
     if (min_x > max_x):
         return draw_border(max_x, min_y, min_x, max_y, resolution)
@@ -164,22 +201,12 @@ def draw_line(x0, y0, x1, y1, thickness = 5,
     dx = x1 - x0
     dy = y1 - y0
     
-    distance = math.ceil(math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2))
+    distance = math.floor(math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2))
     
     for i in range(distance):
-        t = i/distance
+        t = i/(distance - 1)
         x = round(x0 + dx * t)
         y = round(y0 + dy * t)
-        
-        # if (i > 0 and abs(x - x_list[-1]) == 1 and abs(y - y_list[-1]) == 1):
-        #     tx = x - x_list[-1]
-        #     ty = y - y_list[-1]
-            
-        #     x_list.append(x - tx)
-        #     y_list.append(y)
-            
-        #     x_list.append(x)
-        #     y_list.append(y - ty)
         
         r2 = thickness * thickness
         for i in range(max(min_x, x-thickness), min(max_x, x+thickness)+1):
@@ -187,13 +214,10 @@ def draw_line(x0, y0, x1, y1, thickness = 5,
                 d_x = (i - x)
                 d_y = (j - y)
                 d = d_x * d_x + d_y * d_y
-                if (d < r2):
+                if (d <= r2):
                     x_list.append(i)
                     y_list.append(j)
-            
-        # x_list.append(x)
-        # y_list.append(y)
-    
+
     return x_list, y_list
         
 # Utility function for scaling one coordinate system to another coordinate system

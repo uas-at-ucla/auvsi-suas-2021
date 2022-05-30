@@ -49,3 +49,11 @@ if (True):
     plt.plot(pathfinder.x_route, pathfinder.y_route, '-r')
 
     plt.show()
+
+# ox, oy = draw_octagon(100, 100, 50)
+# plt.plot(ox, oy, ".k", alpha=0.5)
+# cx, cy = draw_circle(100, 100, 50)
+# plt.plot(cx, cy, ".k", alpha=0.5, color="red")
+# plt.grid(True)
+# plt.axis("equal")
+# plt.show()

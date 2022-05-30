@@ -304,7 +304,7 @@ class Drone:
             )
             
             n = len(lat_list)
-            d_alt = (point.altitude - current_alt) / n 
+            d_alt = (point.altitude - current_alt) / (n-1) 
             
             next_lat = current_lat
             next_lon = current_lon
@@ -337,8 +337,13 @@ class Drone:
         await self.system.mission.start_mission()
         
         async for progress in self.system.mission.mission_progress():
-            print(f"Item: {progress.current}/{progress.total}, LAT: {self.telemetry.latitude}, LON: {self.telemetry.longitude}, REL_ALT: {self.telemetry.relative_altitude}")
-            # await asyncio.sleep(1)
+            print(f"Item: {progress.current}/{progress.total}, \
+                LAT: {self.telemetry.latitude}, \
+                LON: {self.telemetry.longitude}, \
+                REL_ALT: {self.telemetry.relative_altitude}, \
+                YAW: {self.telemetry.yaw}")
+            if (progress.current == progress.total):
+                break
         print("Mission Done")
         
             
